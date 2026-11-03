@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Addons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sunk: #12110f;
+    --bg: #161513;
+    --card: #1c1a18;
+    --raised: #262421;
+    --line: rgba(239, 233, 222, 0.08);
+    --line-2: rgba(239, 233, 222, 0.16);
+    --text: #efe9de;
+    --text-2: #aaa398;
+    --text-3: #8a847a;
+    --accent: #e3a73f;
+    --good: #4cc38a;
+    --bad: #e5484d;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 15px/22px var(--sans); }
+  a { color: inherit; }
+  svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .shell { max-width: 1200px; margin: 0 auto; padding: 0 32px 64px; }
+
+  /* header */
+  .top { padding: 80px 0 48px; }
+  h1 {
+    font: 400 56px/1.05 var(--serif); letter-spacing: -0.02em;
+    margin: 0 0 16px; font-variation-settings: "opsz" 144;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 0; margin: 0; padding: 0; list-style: none; color: var(--text-3); font: 400 13px/20px var(--mono); }
+  .meta li + li::before { content: "\00b7"; margin: 0 10px; }
+  .meta b { font-weight: 400; color: var(--text-2); }
+  .meta a { color: var(--text-2); text-decoration: none; transition: color 150ms var(--ease); }
+  .meta a:hover { color: var(--text); }
+
+  /* layout */
+  .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 48px; align-items: start; }
+  .side { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .search {
+    width: 100%; height: 36px; padding: 0 12px;
+    background: var(--sunk); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    font: 400 14px var(--sans);
+    transition: border-color 150ms var(--ease);
+  }
+  .search::placeholder { color: var(--text-3); }
+  .search:focus { outline: none; border-color: var(--accent); }
+  .search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cats a {
+    display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px;
+    border-radius: 8px; color: var(--text-2); text-decoration: none; font-size: 14px;
+    transition: background-color 150ms var(--ease), color 150ms var(--ease);
+  }
+  .cats a:hover { color: var(--text); background: var(--card); }
+  .cats a.on { color: var(--text); background: var(--raised); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+  .cats a .i { color: var(--text-3); }
+  .cats a.on .i { color: var(--accent); }
+  .cats .n { margin-left: auto; color: var(--text-3); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; }
+
+  main { min-width: 0; animation: rise 400ms var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { main { animation: none; } }
+
+  /* this week */
+  .changes {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 24px 12px; margin-bottom: 48px;
+  }
+  .changes h2 { display: flex; align-items: center; gap: 10px; font: 500 15px/20px var(--sans); margin: 0 0 8px; }
+  .changes h2 .i { color: var(--accent); }
+  .changes ol { list-style: none; margin: 0; padding: 0; }
+  .changes li {
+    display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+    min-height: 40px; border-top: 1px solid var(--line);
+  }
+  .changes li:first-child { border-top: 0; }
+  .tag { font: 400 12px var(--mono); }
+  .tag.added { color: var(--good); }
+  .tag.removed { color: var(--bad); }
+  .changes .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .changes a.what { text-decoration: none; font-weight: 500; }
+  .changes a.what:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+  .changes span.what { color: var(--text-3); }
+  .changes .when { color: var(--text-3); font: 400 12px var(--mono); white-space: nowrap; }
+
+  /* categories */
+  section.cat { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .cat-head { display: flex; align-items: baseline; gap: 12px; margin: 0 0 16px; }
+  .cat-head h2 { font: 400 28px/1.2 var(--serif); margin: 0; font-variation-settings: "opsz" 48; }
+  .cat-head .n { color: var(--text-3); font: 400 13px var(--mono); }
+  details.hood > summary { list-style: none; cursor: pointer; }
+  details.hood > summary::-webkit-details-marker { display: none; }
+  details.hood > summary .chev { align-self: center; color: var(--text-3); transition: transform 180ms var(--ease); }
+  details.hood[open] > summary .chev { transform: rotate(90deg); }
+  details.hood > summary:hover h2 { color: var(--text); }
+  details.hood:not([open]) > summary h2 { color: var(--text-2); }
+  .hood-note { color: var(--text-3); font-size: 13px; margin: -8px 0 16px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .addon {
+    display: flex; flex-direction: column; gap: 8px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+    scroll-margin-top: 24px;
+    transition: border-color 180ms var(--ease), background-color 180ms var(--ease);
+  }
+  .addon:hover { border-color: var(--line-2); }
+  .addon.flash { border-color: var(--accent); }
+  .addon-head { display: flex; align-items: baseline; gap: 8px; }
+  .name { font-weight: 500; font-size: 16px; line-height: 22px; overflow-wrap: anywhere; }
+  .ver { color: var(--text-3); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .new { margin-left: auto; color: var(--good); font: 400 12px var(--mono); white-space: nowrap; }
+  .desc { color: var(--text-2); font-size: 14px; line-height: 20px; margin: 0; overflow-wrap: anywhere; }
+  .mods { color: var(--text-3); font-size: 13px; line-height: 20px; margin: 0; }
+  .foot { margin-top: auto; padding-top: 4px; }
+  .link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--accent); font-size: 14px; text-decoration: none;
+  }
+  .link:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .link .i { width: 14px; height: 14px; }
+
+  .empty { color: var(--text-2); }
+  footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; line-height: 20px; }
+
+  @media (max-width: 900px) {
+    .shell { padding: 0 16px 48px; }
+    .top { padding: 48px 0 32px; }
+    h1 { font-size: 40px; }
+    .meta { flex-direction: column; }
+    .meta li + li::before { content: none; }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .side { position: static; }
+    .cats { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .cats a { height: 32px; border: 1px solid var(--line); }
+    .cats .n { margin-left: 0; }
+    .changes { padding: 16px 16px 8px; margin-bottom: 40px; }
+    .changes li { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 8px; }
+    section.cat { margin-bottom: 40px; }
+    .cat-head h2 { font-size: 24px; }
+    .grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <h1 id="title">Addons</h1>
+    <ul class="meta" id="meta"></ul>
+  </header>
+  <div class="layout">
+    <aside class="side" id="side" hidden>
+      <input class="search" id="search" type="search" placeholder="Search" aria-label="Search addons" autocomplete="off">
+      <nav aria-label="Categories"><ul class="cats" id="cats"></ul></nav>
+    </aside>
+    <main>
+      <section class="changes" id="changes" hidden></section>
+      <div id="list"></div>
+      <p class="empty" id="none" hidden>No addons match</p>
+    </main>
+  </div>
+  <footer>Read straight from my AddOns folder and updated automatically</footer>
+</div>
+
+<script>
+window.ADDON_DATA = {"pageTitle":"Saltydayn\u0027s Forever Addons","streamerName":"Saltydayn","twitchUrl":"https://www.twitch.tv/saltydayn","gameLabel":"WoW Forever","onlyEnabled":true,"categories":{"SomeAddonFolder":"Quality of life"},"notes":{},"hide":[],"lastChanged":"2026-11-03T22:25:41.0305498Z","changes":[],"addons":[{"folder":"!ArchonLogger","title":"!ArchonLogger","notes":"","version":"9.6.83","author":"","category":"Archon","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"!BugGrabber","title":"BugGrabber","notes":"Grabs bugs for the bug sack.","version":"v12.1.1","author":"Funkeh","category":"Development Tools","xCategory":"Development Tools","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"AtlasBIStooltips","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[BiS ToolTip]|r","notes":"","version":"1.0.1","author":"","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF22B14C[Core]|r","notes":"Shows the possible loot from the bosses","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"1422985","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"AtlasLootClassic_Collections","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[Collections]|r","notes":"AtlasLoot loot tables from Collections","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_Crafting","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[Crafting]|r","notes":"AtlasLoot loot tables of Crafting Items","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_Data","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFFFF0000[Data]|r","notes":"AtlasLoot data module","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_DungeonsAndRaids","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[Dungeons and Raids]|r","notes":"AtlasLoot loot tables from Dungeons and Raids","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_Factions","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[Factions]|r","notes":"AtlasLoot loot tables from Factions","version":"Forever 1.60.1","author":"sliccr","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_Options","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF22B14C[Options]|r","notes":"AtlasLoot options module","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootClassic_PvP","title":"|TInterface\\AddOns\\AtlasLootClassic\\atlas_tga:16|t AtlasLoot Forever |cFF0099FF[PvP]|r","notes":"AtlasLoot loot tables from PvP","version":"Forever 1.60.1","author":"sliccer","category":"","xCategory":"","group":"AtlasLootClassic","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootClassic"],"enabled":false},{"folder":"AtlasLootContinued","title":"AtlasLoot Continued |cFF22B14C[Core]|r","notes":"Shows the possible loot from the bosses","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"AtlasLootContinued_BiS","title":"AtlasLoot Continued |cFF0099FF[BestInSlot]|r","notes":"AtlasLoot BestInSlot lists","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":true},{"folder":"AtlasLootContinued_Collections","title":"AtlasLoot Continued |cFF0099FF[Collections]|r","notes":"AtlasLoot loot tables from Collections","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_Crafting","title":"AtlasLoot Continued |cFF0099FF[Crafting]|r","notes":"AtlasLoot loot tables of Crafting Items","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_Data","title":"AtlasLoot Continued |cFFFF0000[Data]|r","notes":"AtlasLoot data module","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_DungeonsAndRaids","title":"AtlasLoot Continued |cFF0099FF[Dungeons and Raids]|r","notes":"AtlasLoot loot tables from Dungeons and Raids","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_Factions","title":"AtlasLoot Continued |cFF0099FF[Factions]|r","notes":"AtlasLoot loot tables from Factions","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_Favourites","title":"AtlasLoot Continued |cFF0099FF[Favourites]|r","notes":"Bookmark and browse your favourite loot items","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_Options","title":"AtlasLoot Continued |cFF22B14C[Options]|r","notes":"AtlasLoot options module","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"AtlasLootContinued_PvP","title":"AtlasLoot Continued |cFF0099FF[PvP]|r","notes":"AtlasLoot loot tables from PvP","version":"12857","author":"Okrah, Lag","category":"","xCategory":"Map","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["AtlasLootContinued"],"enabled":false},{"folder":"Auctionator","title":"Auctionator","notes":"A lightweight addon that makes it easy and fast to buy, sell and manage auctions","version":"341","author":"plusmouse, Borjamacare","category":"","xCategory":"Auction/Economy","group":"","partOf":"","website":"https://www.curseforge.com/wow/addons/auctionator","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"AutoBiographer","title":"AutoBiographer","notes":"Automatically track statistics, events, and gear changes. Replay your adventures and revisit character snapshots. Save notes for creatures, items, players, and quests. Manage tasks.","version":"5.1.0","author":"Tollski","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Baganator","title":"Baganator","notes":"","version":"839","author":"plusmouse","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"BetterBlizzFrames","title":"Better|cff00c0ffBlizz|rFrames","notes":"More options for Blizzard frames. Aura filtering, Party castbars, Combat indicator, Dark Mode etc.","version":"v2.2.0c","author":"Bodify","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"940950","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"Blackthornes_Farmer","title":"Blackthornes Farmer","notes":"Search for a material or item and get the mobs, zones and levels to farm it.","version":"v1.4.4","author":"Blackthornes","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"1710618","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Blackthornes_TS","title":"Blackthornes Tradeskills","notes":"Finds profitable crafts, scans the auction house and keeps a craft queue, for WoW: Forever.","version":"v1.6.1","author":"Blackthornes","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"1710638","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"ChatCopyPaste","title":"ChatCopyPaste","notes":"A simple chat copy paste addon.","version":"1.41","author":"Novaspark-Arugal OCE","category":"Chat","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"DBM-Azeroth","title":"|cffffe00a\u003c|r|cffff7d0aDBM|r|cffffe00a\u003e|r |cff69ccf0World Bosses (Vanilla)|r","notes":"","version":"","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Brawlers","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cff4565ffBrawlers|r","notes":"","version":"","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Challenges","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Challenges|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"61621","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Core","title":"|cffffe00a\u003c|r|cffff7d0aDBM Core|r|cffffe00a\u003e|r |cff69ccf0Main Core|r","notes":"Deadly Boss Mods","version":"12.1.18","author":"MysticalOS, QartemisT","category":"DBM","xCategory":"","group":"DBM-Core","partOf":"","website":"https://deadlybossmods.com","curseId":"3358","wowiId":"","loadOnDemand":false,"deps":["DBM-StatusBarTimers"],"enabled":true},{"folder":"DBM-Delves-Midnight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cff4565ffDelves (Midnight)|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Delves-WarWithin","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cff4565ffDelves (TWW)|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-GUI","title":"|cffffe00a\u003c|r|cffff7d0aDBM Core|r|cffffe00a\u003e|r |cff69ccf0Options GUI|r","notes":"GUI for Deadly Boss Mods","version":"12.1.18","author":"MysticalOS, QartemisT","category":"DBM","xCategory":"","group":"DBM-Core","partOf":"","website":"https://deadlybossmods.com","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Lairs-Midnight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffff6010Lairs (Midnight)|r","notes":"","version":"12.1.18","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"3358","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Midnight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cff10ff10World Bosses (Midnight)|r","notes":"","version":"12.1.18","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-BC","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (BC)|r","notes":"","version":"r269","author":"Arta/MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-BfA","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (BfA)|r","notes":"","version":"","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Cataclysm","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (Cata)|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Dragonflight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (DF)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Forever","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (Forever)|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Legion","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (Legion)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Midnight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (Midnight)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-MoP","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (MoP)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Shadowlands","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (SL)|r","notes":"","version":"","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-Vanilla","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (Vanilla)|r","notes":"","version":"r269","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-WarWithin","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (WW)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-WoD","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (WoD)|r","notes":"","version":"r269","author":"","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"314994","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Party-WotLK","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffc030c0Dungeons (WotLK)|r","notes":"","version":"r269","author":"Arta","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Raids-Midnight","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffff6010Raids (Midnight)|r","notes":"","version":"12.1.18","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"3358","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-Raids-Vanilla","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cffff6010Raids (Vanilla)|r","notes":"","version":"r834","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"16442","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-SoundEventsPack","title":"|cffffe00a\u003c|r|cffff7d0aDBM Media|r|cffffe00a\u003e|r |cff308530Sound Events Pack|r","notes":"","version":"1.6.46","author":"MysticalOS, Pardua, Cigawoot","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"289311","wowiId":"","loadOnDemand":false,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-StatusBarTimers","title":"|cffffe00a\u003c|r|cffff7d0aDBM Core|r|cffffe00a\u003e|r |cff69ccf0Status Bar Timers|r","notes":"DBM - status bar timer library","version":"12.1.18","author":"MysticalOS, QartemisT","category":"DBM","xCategory":"","group":"DBM-Core","partOf":"","website":"https://deadlybossmods.com","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"DBM-VPVEM","title":"|cffffe00a\u003c|r|cffff7d0aDBM Media|r|cffffe00a\u003e|r |cff308530Voicepack VEM|r","notes":"","version":"a8e9f0e","author":"Iceoven","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["DBM-Core"],"enabled":true},{"folder":"DBM-WorldEvents","title":"|cffffe00a\u003c|r|cffff7d0aDBM Mod|r|cffffe00a\u003e|r |cff10ff10World Events|r","notes":"","version":"","author":"MysticalOS","category":"DBM","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["DBM-Core"],"enabled":true},{"folder":"Details","title":"Details! Damage Meter","notes":"Essential tool to impress that chick in your raid.","version":"#Details.20261015.15339.172","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Details_Compare2","title":"Details!: Compare 2.0","notes":"Replace the Compare tab in the player breakdown window.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"Details_DataStorage","title":"Details!: Storage","notes":"Stores information for Details! Damage Meter","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["Details"],"enabled":true},{"folder":"Details_EncounterDetails","title":"Details!: Encounter Breakdown (plugin)","notes":"Show detailed information about a boss encounter. Also provide damage per phase, graphic charts, easy weakauras creation.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"Details_RaidCheck","title":"Details!: Raid Check (plugin)","notes":"Show talents and item level for all members in your group, also shows food and flask state.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"Details_Streamer","title":"Details!: Streamer (plugin)","notes":"Show which spells you are casting, viewers can see what are you doing and follow your steps.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"Details_TinyThreat","title":"Details!: Tiny Threat (plugin)","notes":"Threat meter plugin, show threat for group members in the window. Select it from the Plugin menu in the Orange Cogwheel.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"Details_Vanguard","title":"Details!: Vanguard (plugin)","notes":"Show the health and debuffs for tanks in your group.","version":"","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Details"],"enabled":true},{"folder":"DropTheCheapestThing","title":"DropTheCheapestThing","notes":"Drop the cheapest thing you\u0027re carrying","version":"v2026.5","author":"Kemayo","category":"","xCategory":"Inventory","group":"","partOf":"","website":"https://www.wowace.com/projects/dropthecheapestthing","curseId":"17852","wowiId":"12596","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"EllesmereUI","title":"|cff0cd29fEllesmereUI|r","notes":"Shared framework for the EllesmereUI addon suite","version":"9.7.2","author":"Ellesmere","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"1477613","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"EllesmereUIActionBars","title":"|cff0cd29fEllesmereUI|r Action Bars","notes":"Modern action bars built for performance and clarity.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIAuraBuffReminders","title":"|cff0cd29fEllesmereUI|r AuraBuff Reminders","notes":"Simple raid buff, auras, consumables and talent reminders.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIBags","title":"|cff0cd29fEllesmereUI|r Bags","notes":"A beautiful visual refresh of Blizzard Bags with intuitive organization.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":false},{"folder":"EllesmereUIBlizzardSkin","title":"|cff0cd29fEllesmereUI|r Blizzard Skins+","notes":"Clean and beautiful visual refreshes for Blizzard UI elements.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIChat","title":"|cff0cd29fEllesmereUI|r Chat","notes":"Modern chat enhancements with useful utilities.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUICooldownManager","title":"|cff0cd29fEllesmereUI|r Cooldown Manager","notes":"A CDM replacement focused on performance, customizations and alerts.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIDamageMeters","title":"|cff0cd29fEllesmereUI|r Damage Meters","notes":"Lightweight damage meters with simple but powerful customization.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":false},{"folder":"EllesmereUIDataBars","title":"|cff0cd29fEllesmereUI|r DataBars","notes":"Information bar for EllesmereUI - clock, gold, reputation and more","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIForeverEssentials","title":"|cff0cd29fEllesmereUI|r Forever Essentials","notes":"Essential tools for WoW Forever.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIFriends","title":"|cff0cd29fEllesmereUI|r Friends","notes":"A modern friends list with built-in organization tools.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIGroupFinder","title":"|cff0cd29fEllesmereUI|r Group Finder","notes":"Premade Group search filters, listing, and application tools.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUILocales","title":"|cff0cd29fEllesmereUI|r Locales","notes":"EllesmereUI community translations. Loads on demand for non-English locales.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIMinimap","title":"|cff0cd29fEllesmereUI|r Minimap","notes":"A new age minimap with clean styling and square layout options.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIMythicTimer","title":"|cff0cd29fEllesmereUI|r Mythic+ Tools","notes":"A simple Mythic+ timer with full tracking customizations.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUINameplates","title":"|cff0cd29fEllesmereUI|r Nameplates","notes":"Clean, lightweight nameplates with endless customization.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIOptions","title":"|cff0cd29fEllesmereUI|r Options","notes":"EllesmereUI settings panel. Loads on demand when you open EllesmereUI options.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIQoL","title":"|cff0cd29fEllesmereUI|r Quality of Life","notes":"Lightweight quality of life tools and enhancements.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIQuestTracker","title":"|cff0cd29fEllesmereUI|r Quest Tracker","notes":"A clean, updated reskin of Blizzard\u0027s Quest Tracker.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIQuickdraw","title":"|cff0cd29fEllesmereUI|r Quickdraw","notes":"Hold a keybind to open a menu of actions; point or scroll to choose, release to fire.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIRaidFrames","title":"|cff0cd29fEllesmereUI|r Raid \u0026 Party Frames","notes":"Incredibly light performance, modern raid and party frames with endless flexibility.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIResourceBars","title":"|cff0cd29fEllesmereUI|r Resource Bars","notes":"Custom Resource Bars with thresholds, hash lines and more.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"EllesmereUIUnitFrames","title":"|cff0cd29fEllesmereUI|r Unit Frames","notes":"Simple unit frames with a modern visual style.","version":"9.7.2","author":"Ellesmere","category":"|cff0cd29fEllesmere|rUI","xCategory":"","group":"EllesmereUI","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["EllesmereUI"],"enabled":true},{"folder":"FafnyirTools","title":"|cFF6600CCFafnyir Tools|r","notes":"Standalone quality-of-life tools with optional EllesmereUI enhancements.","version":"v2.0.0","author":"Fafnyir","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"ForeverAuras","title":"ForeverAuras","notes":"A powerful, comprehensive utility for displaying graphics and information based on buffs, debuffs, and other triggers.","version":"1.1.0","author":"m33shoq, WeakAuras contributors","category":"","xCategory":"Interface Enhancements","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"ForeverAurasArchive","title":"ForeverAuras Archive","notes":"","version":"1.1.0","author":"m33shoq, WeakAuras contributors","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["ForeverAuras"],"enabled":true},{"folder":"ForeverAurasModelPaths","title":"ForeverAuras Model Paths","notes":"Model paths for ForeverAuras","version":"1.1.0","author":"m33shoq, WeakAuras contributors","category":"","xCategory":"Interface Enhancements","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["ForeverAuras","ForeverAurasOptions"],"enabled":true},{"folder":"ForeverAurasOptions","title":"ForeverAuras Options","notes":"Options for ForeverAuras","version":"1.1.0","author":"m33shoq, WeakAuras contributors","category":"","xCategory":"Interface Enhancements","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["ForeverAuras"],"enabled":true},{"folder":"ForeverAurasTemplates","title":"ForeverAuras Templates","notes":"Templates for ForeverAuras","version":"1.1.0","author":"m33shoq, WeakAuras contributors","category":"","xCategory":"Interface Enhancements","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["ForeverAuras","ForeverAurasOptions"],"enabled":true},{"folder":"ForeverDungeonJournal","title":"DungeonJournal","notes":"Boss, loot and quest journal for WoW Classic dungeons.","version":"1.6.3","author":"Exehn","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"ForeverQuestTint","title":"Forever Quest Tint","notes":"Tints the quest window teal and marks quest names for quests that were not in original Classic.","version":"0.7.1","author":"xanastar","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"GTFO","title":"GTFO","notes":"GTFO, you\u0027re dying!","version":"6.12.2","author":"Zensunim of Dragonblight","category":"Combat","xCategory":"","group":"","partOf":"","website":"","curseId":"20697","wowiId":"17996","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"GuildKit","title":"GuildKit","notes":"Guild tools - core (window, options, guild messaging)","version":"0.12.2","author":"Saltydayn","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"GuildKit_LFG","title":"GuildKit - Group Finder","notes":"Guild-only group finder (part of GuildKit)","version":"0.12.2","author":"Saltydayn","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["GuildKit"],"enabled":true},{"folder":"GuildMap","title":"GuildMap","notes":"Shows Guild Members on Map.","version":"1.5.1","author":"Portalz,Devetik","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":["Blizzard_MapCanvas"],"enabled":true},{"folder":"Leatrix_Maps","title":"Leatrix Maps","notes":"curseforge.com/wow/addons/leatrix-maps","version":"1.60.25","author":"Leatrix","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"298842","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Leatrix_Plus","title":"Leatrix Plus","notes":"curseforge.com/wow/addons/leatrix-plus","version":"1.60.25","author":"Leatrix","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"94855","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Leatrix_Sounds","title":"Leatrix Sounds","notes":"curseforge.com/wow/addons/leatrix-sounds","version":"1.60.25","author":"Leatrix","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"304659","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Library Books","title":"|cFFFF007FLibrary Books","notes":"|cFFFF007FMage Books|cFFFF69B4 (and whatever else) in WoW Forever","version":"4.07","author":"Taraezor","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"949112","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"MacroToolkit","title":"Macro Toolkit","notes":"Enhanced macro frame with additional tools","version":"v2.3.53","author":"Deepac, marciowb, The_Junksterr, Numy","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"47117","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"MacroToolkitIcons","title":"MacroToolkit Icon Data","notes":"Load on demand data for MacroToolkit","version":"v2.3.53","author":"Deepac","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"47117","wowiId":"","loadOnDemand":true,"deps":["MacroToolkit"],"enabled":true},{"folder":"MiniAuras","title":"MiniAuras","notes":"Shows CC and important spells on frames/nameplates/alerts in PvP.","version":"5.44.0","author":"Verz","category":"Mini","xCategory":"","group":"","partOf":"","website":"","curseId":"1439482","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"MiniCC","title":"MiniCC |cff808080(settings bridge for MiniAuras)|r","notes":"Loads the old MiniCC settings file so MiniAuras can import it. Does nothing else.","version":"5.44.0","author":"Verz","category":"Mini","xCategory":"","group":"","partOf":"","website":"","curseId":"1439482","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"MinimapButtonButton","title":"MinimapButtonButton","notes":"Creates a button that collects all minimap buttons","version":"1.24.12","author":"syndenbock","category":"User Interface","xCategory":"","group":"","partOf":"","website":"","curseId":"446096","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"MobInfo2","title":"MobInfo2 |cFF00D1FFClassic","notes":"Adds information about the hovered mob to the tooltip and shows health/mana information in the target frame","version":"12.1.8","author":"","category":"Interface Enhancements","xCategory":"","group":"","partOf":"","website":"","curseId":"mobinfo2","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"NiceDamage","title":"NiceDamage (Reloaded)","notes":"NiceDamage font for your combat text.","version":"3.1.4","author":"Azaiko","category":"Combat","xCategory":"Actionbars","group":"","partOf":"","website":"https://www.curseforge.com/wow/addons/nicedamage-reloaded","curseId":"1431980","wowiId":"27010","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"NovaInstanceTracker","title":"Nova Instance Tracker","notes":"Instance lockout tracking with mob count/xp/gold/trade logs, battleground/arena logs, and much more.","version":"2.32","author":"Novaspark-Arugal OCE","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"OlympusMute","title":"OlympusMute","notes":"Hides chat and invites from guilds on your list (\"Olympus\" by default). Client-side only; does not use the ignore list.","version":"1.3.2","author":"Sol","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Plater","title":"Plater","notes":"Nameplate addon designed for advanced users.","version":"Plater-v662-Vanilla","author":"","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"100547","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"Prat-3.0","title":"Prat |cff8080ff3.0|r","notes":"A framework for chat ehancement modules.","version":"3.9.112","author":"Sylvanaar (Sylvaann - Proudmoore/US-Alliance)","category":"","xCategory":"Chat/Communication","group":"","partOf":"","website":"http://www.wowace.com/wiki/Prat","curseId":"7473","wowiId":"10783","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"Questie","title":"Questie|cFF00FF00 v12.3.1|r","notes":"A standalone Classic QuestHelper","version":"12.3.1","author":"Aero/Logon/Muehe/TheCrux(BreakBB)/Drejjmit/Dyaxler/Cheeq/TechnoHunter/Yttrium/Everyone else","category":"Quests","xCategory":"","group":"","partOf":"","website":"","curseId":"334372","wowiId":"","loadOnDemand":false,"deps":["QuestieDB"],"enabled":true},{"folder":"QuestieDB","title":"QuestieDB","notes":"The database Questie consumes.","version":"1.0.9","author":"Code: Logonz Data: Muehe/TheCrux(BreakBB)/Drejjmit/Dyaxler/Cheeq/TechnoHunter/Yttrium/Everyone else","category":"Quests","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"RareScanner","title":"RareScanner","notes":"Minimap scanner. Warns you visually with a button and a miniature and plays a sound everytime a rare NPC, treasure/chest or event shows up in your minimap","version":"1.60.1","author":"maqjav, Maciza-Tyrande","category":"Collections","xCategory":"Achievements, Map, Miscellaneous","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"RXPGuides","title":"RestedXP Guides","notes":"In-game leveling guides","version":"v4.11.29","author":"RestedXP","category":"Quests","xCategory":"","group":"","partOf":"","website":"","curseId":"486246","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Scrap","title":"Scrap","notes":"Sells all your junk at the merchant.|n|cffbbbbbbBy João Cardoso|r|n|n|TInterface/Addons/Scrap/art/patreon:12:12|t |cff82c5ffpatreon.com/jaliborc|r|n|TInterface/Addons/Scrap/art/paypal:12:12|t |cff82c5ffpaypal.me/jaliborc|r|n|TInterface/Addons/Scrap/art/discord:12:12:0:-2|t |cff82c5ffbit.ly/discord-jaliborc|r","version":"12.1.8","author":"Jaliborc (João Cardoso)","category":"Bags \u0026 Inventory","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":false},{"folder":"Scrap_Config","title":"Scrap |cffffffffOptions|r","notes":"Load on demand configuration menu and tutorials.|n|cffbbbbbbBy João Cardoso|r|n|n|TInterface/Addons/Scrap/art/patreon:12:12|t |cff82c5ffpatreon.com/jaliborc|r|n|TInterface/Addons/Scrap/art/paypal:12:12|t |cff82c5ffpaypal.me/jaliborc|r|n|TInterface/Addons/Scrap/art/discord:12:12:0:-2|t |cff82c5ffbit.ly/discord-jaliborc|r|n|n","version":"12.1.8","author":"Jaliborc (João Cardoso)","category":"Bags \u0026 Inventory","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["Scrap"],"enabled":false},{"folder":"Scrap_Merchant","title":"Scrap |cffffffffMerchant|r","notes":"Load on demand merchant modifications.|n|cffbbbbbbBy João Cardoso|r|n|n|TInterface/Addons/Scrap/art/patreon:12:12|t |cff82c5ffpatreon.com/jaliborc|r|n|TInterface/Addons/Scrap/art/paypal:12:12|t |cff82c5ffpaypal.me/jaliborc|r|n|TInterface/Addons/Scrap/art/discord:12:12:0:-2|t |cff82c5ffbit.ly/discord-jaliborc|r|n|n","version":"12.1.8","author":"Jaliborc (João Cardoso)","category":"Bags \u0026 Inventory","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":true,"deps":["Scrap"],"enabled":false},{"folder":"SimpleItemLevel","title":"Simple Item Level","notes":"Show item levels in useful places","version":"v74.1","author":"Kemayo","category":"","xCategory":"","group":"","partOf":"","website":"https://www.wowace.com/projects/simple-item-level","curseId":"287692","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Simulationcraft","title":"Simulationcraft","notes":"Constructs SimC export strings","version":"12.1.5-03","author":"Theck, navv_, seriallos","category":"Other","xCategory":"","group":"","partOf":"","website":"","curseId":"82745","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"SkillUpForever","title":"SkillUp Forever","notes":"Required skill, colour thresholds and skill-up chance for every recipe in the Professions window.","version":"v0.20.4","author":"cjber","category":"Professions","xCategory":"","group":"","partOf":"","website":"https://github.com/cjber/skillup-forever","curseId":"1705762","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"SpeedyAutoLoot","title":"|cffEEE4AESpeedy AutoLoot|r","notes":"|cff58C6FALoot at ludicrous speed!|r|n|n|cffFFC700Slash command: /sal, /speedyautoloot|r","version":"124","author":"Yuyuli","category":"Loot","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"Syndicator","title":"Syndicator","notes":"","version":"288","author":"plusmouse","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"TomTom","title":"TomTom","notes":"Acts as your portable navigation assistant","version":"v4.3.13-release","author":"Cladhaire, Ludovicus","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"18808","wowiId":"7032","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"WaylaidCost","title":"WaylaidCost","notes":"Compare Waylaid Crate and optional Craftsman\u0027s Writ costs and rewards. WoW Forever 1.60 beta.","version":"0.1.2","author":"Shakam","category":"","xCategory":"Auction/Economy","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"WaypointUI","title":"Waypoint UI","notes":"An in-world waypoint and pinpoint to show relevant information directly in world-space.","version":"1.7.3","author":"AdaptiveX","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"","wowiId":"","loadOnDemand":false,"deps":[],"enabled":true},{"folder":"WhatsTraining","title":"What\u0027s Training?","notes":"Shows you what spells are available at your class trainer","version":"11.0.0-beta26","author":"Sveng","category":"","xCategory":"","group":"","partOf":"","website":"","curseId":"324944","wowiId":"25031","loadOnDemand":false,"deps":[],"enabled":true}],"generated":"2026-11-03T22:28:10.2228353Z"};
+</script>
+<script>
+(function () {
+  "use strict";
+  var D = window.ADDON_DATA;
+  var $ = function (id) { return document.getElementById(id); };
+  // Accept arrays that Windows PowerShell 5.1 wrapped as {"value":[...]}
+  function arr(x) { return Array.isArray(x) ? x : (x && Array.isArray(x.value) ? x.value : []); }
+
+  if (!D) {
+    $("list").innerHTML = '<p class="empty">No addon data yet. Run Update-AddonList.ps1 to build this page.</p>';
+    return;
+  }
+  D.addons = arr(D.addons); D.hide = arr(D.hide); D.changes = arr(D.changes);
+  D.addons.concat(D.changes).forEach(function (a) { a.deps = arr(a.deps); });
+
+  // ------------------------------------------------------------ categories
+  var UI = "Interface", CB = "Combat", QM = "Questing & maps", GE = "Gear & economy",
+      QL = "Quality of life", OTHER = "Other", HOOD = "Under the hood";
+  var ORDER = [UI, CB, QM, GE, QL];
+
+  // Common Classic-era addons: [category, short description]. Keys are folder
+  // names in lower case; a key also matches folders that start with it.
+  var DB = {
+    "bartender4": [UI, "Replaces the default action bars with bars you can move, resize and style"],
+    "dominos": [UI, "Movable, configurable action bars"],
+    "masque": [UI, "Skins action buttons and icons with custom styles"],
+    "elvui": [UI, "Complete UI replacement with unit frames, bars, bags and chat"],
+    "shadowedunitframes": [UI, "Clean, configurable player, target and party frames"],
+    "pitbull4": [UI, "Highly customizable unit frames"],
+    "grid2": [UI, "Compact raid frames built for healers"],
+    "vuhdo": [UI, "Raid frames with click-casting, built for healers"],
+    "healbot": [UI, "Healing frames with click-to-cast"],
+    "clique": [UI, "Click-casting on unit frames"],
+    "plater": [UI, "Customizable nameplates with threat colors and scripting"],
+    "tidyplates_threatplates": [UI, "Nameplates that change color with threat"],
+    "kui_nameplates": [UI, "Lightweight, clean nameplates"],
+    "bagnon": [UI, "Puts all your bags in one window and shows your bank from anywhere"],
+    "adibags": [UI, "One bag window that sorts items into groups automatically"],
+    "baganator": [UI, "Single bag window with sorting and search across all your characters"],
+    "arkinventory": [UI, "Bag replacement with rule-based item categories"],
+    "prat-3.0": [UI, "Chat upgrades like timestamps, copyable links and class-colored names"],
+    "chattynator": [UI, "Reworked chat window with tabs and search"],
+    "tiptac": [UI, "Restyled tooltips with class colors and target info"],
+    "sexymap": [UI, "Restyles the minimap with new shapes and borders"],
+    "titan": [UI, "Info bar along the top of the screen"],
+    "moveany": [UI, "Move and resize any part of the default interface"],
+
+    "dbm-core": [CB, "Boss timers and warnings for raids and dungeons"],
+    "dbm-": [CB, "Boss timers and warnings for raids and dungeons"],
+    "bigwigs": [CB, "Lightweight boss timers and warnings"],
+    "details": [CB, "Damage and healing meter with in-depth fight breakdowns"],
+    "recount": [CB, "Damage and healing meter"],
+    "skada": [CB, "Lightweight damage and healing meter"],
+    "weakauras": [CB, "Custom on-screen alerts for buffs, cooldowns, procs and more"],
+    "omnicc": [CB, "Cooldown timers as numbers on every icon"],
+    "classiccastbars": [CB, "Cast bars for enemies on nameplates and the target frame"],
+    "quartz": [CB, "Movable, configurable cast bars"],
+    "decursive": [CB, "One-click dispelling for your group"],
+    "threatclassic2": [CB, "Threat meter for your group"],
+    "tellmewhen": [CB, "Icons that track cooldowns, buffs and debuffs"],
+    "nugrunning": [CB, "Timer bars for your buffs, debuffs and cooldowns"],
+    "mikscrollingbattletext": [CB, "Configurable scrolling combat text"],
+    "classicauradurations": [CB, "Shows buff and debuff durations on enemies"],
+    "realmobhealth": [CB, "Shows real health numbers for enemies"],
+    "spy": [CB, "Warns you when enemy players are nearby"],
+    "gladdy": [CB, "Arena enemy frames with trinkets and cooldowns"],
+    "capping": [CB, "Battleground timers and objective info"],
+
+    "questie": [QM, "Shows quest givers, objectives and turn-ins on your map"],
+    "rxpguides": [QM, "Step-by-step leveling guide with waypoints"],
+    "guidelime": [QM, "In-game leveling guides that track your steps"],
+    "zygor": [QM, "Step-by-step leveling and gold guides"],
+    "tomtom": [QM, "Waypoints and a navigation arrow"],
+    "mapster": [QM, "World map tweaks like scaling, moving and transparency"],
+    "leatrix_maps": [QM, "World map upgrades like unexplored areas, coordinates and dungeon icons"],
+    "handynotes": [QM, "Custom notes and pins on the map"],
+    "whatstraining": [QM, "Shows which spells you can learn at your trainer"],
+
+    "auctionator": [GE, "Makes searching, buying and posting at the auction house fast"],
+    "auc-advanced": [GE, "Auction house scanning and pricing"],
+    "tradeskillmaster": [GE, "Full toolkit for auction house trading and crafting"],
+    "tsm_": [GE, "Full toolkit for auction house trading and crafting"],
+    "atlaslootclassic": [GE, "Loot tables for every dungeon and raid"],
+    "pawn": [GE, "Tells you which items are upgrades for your character"],
+    "itemrack": [GE, "Save gear sets and swap them with one click"],
+    "outfitter": [GE, "Gear sets with automatic swapping"],
+    "trinketmenu": [GE, "Quick menu for swapping trinkets"],
+    "tacotip": [GE, "Gear score and talents in player tooltips"],
+    "gathermate2": [GE, "Remembers herb, ore and fishing spots and shows them on the map"],
+    "gatherer": [GE, "Remembers herb and ore spots and shows them on the map"],
+    "vendorprice": [GE, "Vendor sell prices in item tooltips"],
+    "fishingbuddy": [GE, "Fishing helper with outfit swaps, easy casting and a catch log"],
+
+    "leatrix_plus": [QL, "Dozens of small quality-of-life tweaks in one addon"],
+    "postal": [QL, "Mailbox upgrades like opening all mail at once"],
+    "lfgbulletinboard": [QL, "Collects group requests from chat into one list"],
+    "novaworldbuffs": [QL, "Tracks world buff timers like Onyxia and Rend"],
+    "novainstancetracker": [QL, "Tracks dungeon lockouts and the hourly instance limit"],
+
+    "!buggrabber": [HOOD, "Catches Lua errors for BugSack"],
+    "bugsack": [HOOD, "Collects Lua errors so they don't interrupt you"],
+    "ace3": [HOOD, "Library that many addons are built on"]
+  };
+  var DB_KEYS = Object.keys(DB).sort(function (a, b) { return b.length - a.length; });
+  function known(folder) {
+    var f = folder.toLowerCase();
+    if (DB[f]) return DB[f];
+    for (var i = 0; i < DB_KEYS.length; i++) {
+      var k = DB_KEYS[i];
+      if (k.length >= 4 && f.indexOf(k) === 0) return DB[k];
+    }
+    return null;
+  }
+  // Authors' own .toc categories, folded into the broad groups
+  function bucket(text) {
+    var s = (text || "").toLowerCase();
+    if (!s) return null;
+    if (/librar|develop|framework/.test(s)) return HOOD;
+    if (/quest|map|level|guide|navigat|explor/.test(s)) return QM;
+    if (/unit ?frame|action ?bar|nameplate|interface|\bui\b|chat|bag|inventory|tooltip|minimap|skin|hud/.test(s)) return UI;
+    if (/combat|raid|dungeon|boss|pvp|arena|battleground|damage|heal|dps|tank|class|cooldown|aura|buff|threat|cast/.test(s)) return CB;
+    if (/auction|econom|profession|trade|gold|craft|gather|loot|gear|item|vendor|mail/.test(s)) return GE;
+    if (/quality|utilit|misc|social|convenien/.test(s)) return QL;
+    return null;
+  }
+  function lowerMap(o) { var m = {}; Object.keys(o || {}).forEach(function (k) { m[k.toLowerCase()] = o[k]; }); return m; }
+  var catOverride = lowerMap(D.categories), noteOverride = lowerMap(D.notes);
+
+  function categoryOf(a) {
+    var f = a.folder.toLowerCase();
+    if (catOverride[f]) return catOverride[f];
+    var k = known(a.folder);
+    if (k) return k[0];
+    if (/^(lib|!)/.test(f)) return HOOD;
+    return bucket(a.category) || bucket(a.xCategory) || OTHER;
+  }
+  function descOf(a) {
+    var f = a.folder.toLowerCase();
+    if (noteOverride[f]) return noteOverride[f];
+    var k = known(a.folder);
+    if (k && k[1]) return k[1];
+    if (a.notes && plain(a.notes).toLowerCase() !== plain(a.title || a.folder).toLowerCase()) return a.notes;
+    if (/^lib/.test(f)) return "Shared library used by other addons";
+    return "";
+  }
+
+  // ------------------------------------------------------------ WoW text codes
+  function legible(hex) {
+    var r = parseInt(hex.substr(0, 2), 16), g = parseInt(hex.substr(2, 2), 16), b = parseInt(hex.substr(4, 2), 16);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) > 90;
+  }
+  function wow(str, el) {
+    var color = null, buf = "", i = 0;
+    function flush() {
+      if (!buf) return;
+      if (color) { var s = document.createElement("span"); s.style.color = color; s.textContent = buf; el.appendChild(s); }
+      else el.appendChild(document.createTextNode(buf));
+      buf = "";
+    }
+    while (i < str.length) {
+      var c = str[i], n = str[i + 1];
+      if (c === "|" && n) {
+        if (n === "|") { buf += "|"; i += 2; continue; }
+        if ((n === "c" || n === "C") && /^[0-9a-f]{8}$/i.test(str.substr(i + 2, 8))) {
+          flush(); var hex = str.substr(i + 4, 6); color = legible(hex) ? "#" + hex : null; i += 10; continue;
+        }
+        if (n === "r" || n === "R") { flush(); color = null; i += 2; continue; }
+        if (n === "n") { buf += " "; i += 2; continue; }
+        if (n === "T" || n === "A") {
+          var end = str.indexOf(n === "T" ? "|t" : "|a", i + 2);
+          if (end >= 0) { i = end + 2; continue; }
+        }
+      }
+      buf += c; i++;
+    }
+    flush();
+    return el;
+  }
+  function plain(str) {
+    return (str || "").replace(/\|\|/g, "\u0001").replace(/\|c[0-9a-f]{8}/gi, "").replace(/\|r/gi, "")
+      .replace(/\|T.*?\|t/g, "").replace(/\|A.*?\|a/g, "").replace(/\|n/g, " ")
+      .replace(/\u0001/g, "|").replace(/\s+/g, " ").trim();
+  }
+
+  // ------------------------------------------------------------ grouping
+  var hidden = {};
+  D.hide.forEach(function (h) { hidden[String(h).toLowerCase()] = true; });
+  var addons = D.addons.filter(function (a) {
+    return !hidden[a.folder.toLowerCase()] && (!D.onlyEnabled || a.enabled !== false);
+  });
+
+  function firstToken(s) { return s.toLowerCase().split(/[-_ .]/)[0]; }
+  function index(list) { var m = {}; list.forEach(function (a) { m[a.folder.toLowerCase()] = a; }); return m; }
+  function parentIn(map, a) {
+    var self = a.folder.toLowerCase();
+    var hints = [a.partOf, a.group].filter(Boolean);
+    for (var i = 0; i < hints.length; i++) {
+      var p = map[hints[i].toLowerCase()];
+      if (p && p !== a) return p;
+    }
+    for (var j = 0; j < a.deps.length; j++) {
+      var d = map[String(a.deps[j]).toLowerCase()];
+      if (!d || d === a) continue;
+      var pf = d.folder.toLowerCase();
+      if (self.indexOf(pf) === 0 || firstToken(self) === firstToken(pf)) return d;
+    }
+    return null;
+  }
+  function rootIn(map, a) {
+    var seen = [a], cur = a, p;
+    while ((p = parentIn(map, cur)) && seen.indexOf(p) < 0) { seen.push(p); cur = p; }
+    return cur;
+  }
+
+  var byKey = index(addons);
+  var roots = [];
+  addons.forEach(function (a) { a.children = []; });
+  addons.forEach(function (a) {
+    var r = rootIn(byKey, a);
+    if (r === a) roots.push(a); else r.children.push(a);
+  });
+
+  // ------------------------------------------------------------ time
+  var NOW = Date.now(), WEEK = 7 * 864e5;
+  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat("en", { numeric: "auto" }) : null;
+  function ago(iso) {
+    var t = Date.parse(iso);
+    if (isNaN(t)) return "";
+    var s = Math.round((t - NOW) / 1000), a = Math.abs(s);
+    if (a < 60) return "just now";
+    var steps = [[3600, 60, "minute"], [86400, 3600, "hour"], [604800, 86400, "day"], [2629800, 604800, "week"], [31557600, 2629800, "month"], [Infinity, 31557600, "year"]];
+    for (var i = 0; i < steps.length; i++) {
+      if (a < steps[i][0]) {
+        var v = Math.round(s / steps[i][1]);
+        if (rtf) return rtf.format(v, steps[i][2]);
+        v = Math.abs(v); return v + " " + steps[i][2] + (v === 1 ? "" : "s") + " ago";
+      }
+    }
+    return "";
+  }
+
+  // ------------------------------------------------------------ changes this week
+  var latest = {};
+  D.changes.forEach(function (e) {
+    var t = Date.parse(e.at);
+    if (!isNaN(t) && NOW - t < WEEK) latest[e.folder.toLowerCase()] = e;   // later entries win
+  });
+  var recent = Object.keys(latest).map(function (k) { return latest[k]; });
+  var addedSet = {}, removed = [];
+  recent.forEach(function (e) {
+    var key = e.folder.toLowerCase();
+    if (e.type === "added" && byKey[key]) addedSet[key] = e;
+    if (e.type === "removed" && !byKey[key]) removed.push(e);
+  });
+  var removedMap = index(removed);
+  var shownChanges = [];
+  Object.keys(addedSet).forEach(function (k) {
+    var a = byKey[k], r = rootIn(byKey, a);
+    if (r !== a && addedSet[r.folder.toLowerCase()]) return;   // module of an addon that is itself new
+    shownChanges.push({ e: addedSet[k], a: a, root: r });
+  });
+  removed.forEach(function (e) {
+    if (rootIn(removedMap, e) !== e) return;
+    shownChanges.push({ e: e });
+  });
+  shownChanges.sort(function (x, y) { return Date.parse(y.e.at) - Date.parse(x.e.at); });
+
+  // ------------------------------------------------------------ icons (lucide)
+  var ICONS = {
+    "Interface": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+    "Combat": '<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/>',
+    "Questing & maps": '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+    "Gear & economy": '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+    "Quality of life": '<line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>',
+    "Under the hood": '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+    "_": '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+    "history": '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    "out": '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    "chev": '<path d="m9 18 6-6-6-6"/>'
+  };
+  function icon(name, cls) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true");
+    s.setAttribute("class", "i" + (cls ? " " + cls : ""));
+    s.innerHTML = ICONS[name] || ICONS._;
+    return s;
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function linkFor(a) {
+    if (/^\d+$/.test(a.curseId || "")) return { href: "https://www.curseforge.com/projects/" + a.curseId, label: "CurseForge" };
+    if (/^\d+$/.test(a.wowiId || "")) return { href: "https://www.wowinterface.com/downloads/info" + a.wowiId, label: "WoWInterface" };
+    var w = (a.website || "").trim();
+    if (w && !/\s/.test(w)) {
+      if (!/^https?:\/\//i.test(w)) w = "https://" + w;
+      return { href: w, label: "Website" };
+    }
+    return null;
+  }
+  var titleOf = function (a) { return a.title || a.folder; };
+  var byTitle = function (x, y) { return plain(titleOf(x)).localeCompare(plain(titleOf(y))); };
+
+  // ------------------------------------------------------------ header
+  var who = D.pageTitle || (D.streamerName ? D.streamerName + "’s addons" : "Addons");
+  $("title").textContent = who;
+  document.title = who;
+
+  var meta = $("meta");
+  function metaItem(node) { var li = el("li"); li.appendChild(node); meta.appendChild(li); }
+  metaItem(document.createTextNode(D.gameLabel || "WoW Forever"));
+  var count = el("b", null, String(roots.length));
+  var cnt = document.createDocumentFragment(); cnt.appendChild(count); cnt.appendChild(document.createTextNode(roots.length === 1 ? " addon" : " addons"));
+  metaItem(cnt);
+  if (D.lastChanged && ago(D.lastChanged)) metaItem(document.createTextNode("list changed " + ago(D.lastChanged)));
+  if (D.twitchUrl && /^https?:\/\//i.test(D.twitchUrl)) {
+    var tw = el("a", null, D.twitchUrl.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""));
+    tw.href = D.twitchUrl;
+    metaItem(tw);
+  }
+
+  // ------------------------------------------------------------ this week panel
+  if (shownChanges.length) {
+    var box = $("changes");
+    var h = el("h2"); h.appendChild(icon("history")); h.appendChild(document.createTextNode("This week"));
+    box.appendChild(h);
+    var ol = el("ol");
+    shownChanges.forEach(function (c) {
+      var li = el("li");
+      var added = c.e.type === "added";
+      li.appendChild(el("span", "tag " + (added ? "added" : "removed"), added ? "Added" : "Removed"));
+      if (added) {
+        var a = el("a", "what"); a.href = "#a-" + slug(c.root.folder);
+        wow(titleOf(c.a), a);
+        if (c.root !== c.a) a.appendChild(el("span", "ver", " in " + plain(titleOf(c.root))));
+        a.addEventListener("click", function () { flash("a-" + slug(c.root.folder)); });
+        li.appendChild(a);
+      } else {
+        li.appendChild(el("span", "what", plain(titleOf(c.e))));
+      }
+      li.appendChild(el("span", "when", ago(c.e.at)));
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+    box.hidden = false;
+  }
+  function flash(id) {
+    var card = $(id);
+    if (!card) return;
+    var hood = card.closest("details");
+    if (hood) hood.open = true;
+    card.classList.add("flash");
+    setTimeout(function () { card.classList.remove("flash"); }, 1600);
+  }
+
+  // ------------------------------------------------------------ categories + cards
+  var groups = {};
+  roots.forEach(function (a) { var c = categoryOf(a); (groups[c] = groups[c] || []).push(a); });
+  function rank(n) { var i = ORDER.indexOf(n); return i >= 0 ? i : n === HOOD ? 99 : n === OTHER ? 98 : 50; }
+  var names = Object.keys(groups).sort(function (x, y) { return rank(x) - rank(y) || x.localeCompare(y); });
+
+  var list = $("list"), cats = $("cats"), rows = [], sections = [];
+  names.forEach(function (cat) {
+    var items = groups[cat].sort(byTitle);
+    var id = "c-" + slug(cat);
+    var sec = el("section", "cat"); sec.id = id;
+
+    var head = el("div", "cat-head");
+    head.appendChild(el("h2", null, cat));
+    head.appendChild(el("span", "n", String(items.length)));
+    var grid = el("div", "grid");
+
+    if (cat === HOOD) {
+      var det = el("details", "hood");
+      var sum = el("summary");
+      head.insertBefore(icon("chev", "chev"), head.firstChild);
+      sum.appendChild(head);
+      det.appendChild(sum);
+      det.appendChild(el("p", "hood-note", "Libraries and helpers other addons need"));
+      det.appendChild(grid);
+      sec.appendChild(det);
+    } else {
+      sec.appendChild(head);
+      sec.appendChild(grid);
+    }
+
+    items.forEach(function (a) {
+      var card = el("article", "addon"); card.id = "a-" + slug(a.folder);
+      var top = el("div", "addon-head");
+      top.appendChild(wow(titleOf(a), el("span", "name")));
+      var v = (a.version || "").trim();
+      if (/^v?\d[\w.\-]*$/i.test(v)) top.appendChild(el("span", "ver", /^\d/.test(v) ? "v" + v : v));
+      if (addedSet[a.folder.toLowerCase()]) top.appendChild(el("span", "new", "New"));
+      card.appendChild(top);
+
+      var d = descOf(a);
+      if (d) card.appendChild(wow(d, el("p", "desc")));
+      if (a.children.length) {
+        var kids = a.children.slice().sort(byTitle).map(function (c) { return plain(titleOf(c)); });
+        card.appendChild(el("p", "mods", "Includes " + kids.join(", ")));
+      }
+      var link = linkFor(a);
+      if (link) {
+        var foot = el("div", "foot");
+        var la = el("a", "link", link.label); la.href = link.href; la.target = "_blank"; la.rel = "noopener";
+        la.appendChild(icon("out"));
+        foot.appendChild(la);
+        card.appendChild(foot);
+      }
+      grid.appendChild(card);
+      rows.push({ card: card, sec: sec, text: [a.folder, plain(a.title), plain(d)].concat(
+        a.children.map(function (c) { return c.folder + " " + plain(c.title); })).join(" ").toLowerCase() });
+    });
+    list.appendChild(sec);
+    sections.push(sec);
+
+    var li = el("li");
+    var nav = el("a"); nav.href = "#" + id; nav.dataset.target = id;
+    nav.appendChild(icon(ICONS[cat] ? cat : "_"));
+    nav.appendChild(el("span", null, cat));
+    nav.appendChild(el("span", "n", String(items.length)));
+    if (cat === HOOD) nav.addEventListener("click", function () { sec.querySelector("details").open = true; });
+    li.appendChild(nav); cats.appendChild(li);
+  });
+
+  $("side").hidden = roots.length === 0;
+  if (!roots.length) { $("none").textContent = "No addons found"; $("none").hidden = false; }
+
+  // ------------------------------------------------------------ search
+  $("search").addEventListener("input", function (e) {
+    var q = e.target.value.trim().toLowerCase(), shown = 0, live = new Set();
+    rows.forEach(function (r) {
+      var ok = !q || r.text.indexOf(q) >= 0;
+      r.card.hidden = !ok;
+      if (ok) { shown++; live.add(r.sec); }
+    });
+    sections.forEach(function (s) {
+      s.hidden = !live.has(s);
+      var det = s.querySelector("details");
+      if (det && q && live.has(s)) det.open = true;
+    });
+    $("changes").hidden = !!q || !shownChanges.length;
+    $("none").hidden = shown > 0 || !roots.length;
+  });
+
+  // ------------------------------------------------------------ highlight the category in view
+  if ("IntersectionObserver" in window) {
+    var links = cats.querySelectorAll("a");
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (l) { l.classList.toggle("on", l.dataset.target === en.target.id); });
+      });
+    }, { rootMargin: "-15% 0px -75% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
