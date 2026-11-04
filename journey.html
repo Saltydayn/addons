@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Road to 60 &amp; Beyond!</title>
+<meta name="description" content="My leveling journey in WoW Forever: time to 60, pace, deaths, zones, dungeons and more.">
+<meta name="theme-color" content="#161513">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Road to 60 &amp; Beyond!">
+<meta property="og:description" content="My leveling journey in WoW Forever: time to 60, pace, deaths, zones, dungeons and more.">
+<meta property="og:url" content="https://saltydayn.github.io/addons/journey.html">
+<meta property="og:image" content="https://saltydayn.github.io/addons/assets/og-journey.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sunk: #12110f;
+    --bg: #161513;
+    --card: #1c1a18;
+    --raised: #262421;
+    --line: rgba(239, 233, 222, 0.08);
+    --line-2: rgba(239, 233, 222, 0.16);
+    --text: #efe9de;
+    --text-2: #aaa398;
+    --text-3: #8a847a;
+    --accent: #e3a73f;
+    --accent-hover: #ecb556;
+    --on-accent: #1b1509;
+    --cond: #9fb4c7;
+    --good: #4cc38a;
+    --bad: #e5484d;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --display: "Montserrat", system-ui, sans-serif;
+    --sans: "Montserrat", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 15px/24px var(--sans); }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .shell { max-width: 1200px; margin: 0 auto; padding: 0 32px 64px; }
+
+  /* page switch (shared with the addon page) */
+  .pages { display: flex; gap: 24px; padding-top: 32px; font: 400 13px/20px var(--mono); }
+  .pages a { color: var(--text-3); text-decoration: none; padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color 150ms var(--ease); }
+  .pages a:hover { color: var(--text); }
+  .pages a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* header */
+  .top { padding: 48px 0 48px; }
+  h1 {
+    font: 700 52px/1.08 var(--display); letter-spacing: -0.03em;
+    margin: 0 0 16px; text-wrap: balance;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 0; margin: 0; padding: 0; list-style: none; color: var(--text-3); font: 400 13px/20px var(--mono); }
+  /* every item gets a leading dot; the first 24px are clipped, so no line ever starts with one */
+  .meta { margin-left: -24px; clip-path: inset(-8px -8px -8px 24px); }
+  .meta li::before { content: "\00b7"; display: inline-block; width: 24px; text-align: center; }
+  .meta b { font-weight: 400; color: var(--text-2); }
+  .meta a { color: var(--text-2); text-decoration: none; transition: color 150ms var(--ease); }
+  .meta a:hover { color: var(--text); }
+
+  /* layout */
+  .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 48px; align-items: start; }
+  .side { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .search {
+    width: 100%; height: 36px; padding: 0 12px;
+    background: var(--sunk); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    font: 400 14px var(--sans);
+    transition: border-color 150ms var(--ease);
+  }
+  .search::placeholder { color: var(--text-3); }
+  .search:focus { outline: none; border-color: var(--accent); }
+  .search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .tabs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tabs a {
+    display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px;
+    border-radius: 8px; color: var(--text-2); text-decoration: none; font-size: 14px;
+    transition: background-color 150ms var(--ease), color 150ms var(--ease);
+  }
+  .tabs a:hover { color: var(--text); background: var(--card); }
+  .tabs a.on { color: var(--text); background: var(--raised); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+  .tabs a .i { color: var(--text-3); }
+  .tabs a.on .i { color: var(--accent); }
+  .tabs .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabs .n { margin-left: auto; color: var(--text-3); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; }
+  .tabs .sep { height: 1px; background: var(--line); margin: 8px 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin: 0 4px; background: var(--text-3); }
+
+  main { min-width: 0; animation: rise 400ms var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { main { animation: none; } }
+
+  .toc { list-style: none; margin: 8px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+  .toc a { display: block; padding: 4px 10px; border-radius: 6px; color: var(--text-3); text-decoration: none; font-size: 13px; line-height: 20px; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
+  .toc a:hover { color: var(--text); background: var(--card); }
+  .tabs .main-tag { color: var(--accent); font: 400 11px var(--mono); }
+
+  /* sections */
+  section.block { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .block-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 16px; }
+  .block-head h2 { font: 600 24px/1.25 var(--display); letter-spacing: -0.02em; margin: 0; }
+  .block-head .sub { color: var(--text-3); font: 400 13px var(--mono); }
+  .note { color: var(--text-3); font-size: 13px; line-height: 20px; margin: 12px 0 0; }
+  .empty { color: var(--text-3); margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; min-width: 0; }
+  .card h3 { font: 500 15px/20px var(--sans); margin: 0 0 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: start; }
+  .cards.two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; align-items: start; }
+  .grid > * { transition: border-color 600ms var(--ease), transform 180ms var(--ease); }
+  .grid > .card:hover { border-color: var(--line-2); transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .grid > .card:hover { transform: none; } }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--text-3); }
+  .mono { font-family: var(--mono); }
+
+  /* hero: time to 60 + tiles */
+  .hero {
+    display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px 32px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-bottom: 56px;
+  }
+  .label { margin: 0 0 8px; color: var(--text-3); font: 400 13px/20px var(--mono); }
+  .big { margin: 0; font: 700 56px/1.05 var(--display); letter-spacing: -0.03em; }
+  .big small { font: 500 17px/1 var(--sans); letter-spacing: 0; color: var(--text-2); margin-left: 6px; }
+  .range { margin: 12px 0 0; color: var(--text-2); }
+  .range b { color: var(--text); font-weight: 600; }
+  .status { display: inline-flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 6px 10px; border-radius: 8px; background: var(--raised); color: var(--text-2); font-size: 13px; line-height: 20px; }
+  .status .i { color: var(--accent); }
+  details.how { margin-top: 16px; color: var(--text-2); font-size: 13px; line-height: 20px; }
+  details.how summary { cursor: pointer; color: var(--text-3); font: 400 13px/20px var(--mono); list-style: none; display: inline-flex; align-items: center; gap: 6px; }
+  details.how summary::-webkit-details-marker { display: none; }
+  details.how summary .i { width: 14px; height: 14px; transition: transform 180ms var(--ease); }
+  details.how[open] summary .i { transform: rotate(90deg); }
+  details.how summary:hover { color: var(--text); }
+  details.how p { margin: 8px 0 0; }
+  details.how b { color: var(--text); font-weight: 500; }
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tile { background: var(--sunk); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+  .tile .label { margin-bottom: 4px; }
+  .tile .val { font: 600 28px/1.2 var(--display); letter-spacing: -0.02em; }
+  .tile .val small { font: 500 14px var(--sans); color: var(--text-2); letter-spacing: 0; margin-left: 4px; }
+  .tile .foot { margin: 6px 0 0; color: var(--text-3); font-size: 13px; line-height: 18px; overflow-wrap: anywhere; }
+  .xpbar { position: relative; height: 8px; margin-top: 10px; border-radius: 4px; background: var(--raised); overflow: hidden; }
+  .xpbar span { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 4px; }
+  .xpbar .fill { background: var(--accent); }
+  .xpbar .rest { background: rgba(227, 167, 63, 0.32); border-radius: 0 4px 4px 0; }
+  .dotc { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+
+  /* charts */
+  .chart-card { padding: 16px 16px 8px; }
+  .chart-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; margin: 0 4px 8px; }
+  .chart-head h3 { margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; color: var(--text-2); font-size: 13px; line-height: 20px; }
+  .legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .key { width: 16px; height: 0; border-top: 2px solid var(--accent); }
+  .key.dash { border-top-style: dashed; }
+  .key.ref { border-top-color: var(--text-3); }
+  .key.band { height: 10px; border: 0; border-radius: 2px; background: rgba(239, 233, 222, 0.10); }
+  .chart { position: relative; touch-action: pan-y; }
+  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart .grid-l { stroke: var(--line); stroke-width: 1; }
+  .chart .axis-t { fill: var(--text-3); font: 400 11px var(--mono); }
+  .chart .s-you { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart .s-fc { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 5; stroke-linecap: round; opacity: 0.8; }
+  .chart .s-ref { fill: none; stroke: var(--text-3); stroke-width: 1.5; stroke-linejoin: round; }
+  .chart .band { fill: rgba(239, 233, 222, 0.07); }
+  .chart .end { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
+  .chart .col { fill: var(--accent); }
+  .chart .col.now { fill: rgba(227, 167, 63, 0.4); }
+  .chart .col.dim { opacity: 0.35; }
+  .chart .cross { stroke: var(--line-2); stroke-width: 1; }
+  .chart .hit { fill: transparent; cursor: crosshair; }
+  .chart .end-t { fill: var(--text); font: 500 12px var(--mono); }
+  .tip {
+    position: absolute; z-index: 3; pointer-events: none; min-width: 140px; max-width: 260px;
+    padding: 8px 12px; border-radius: 8px; background: var(--raised); border: 1px solid var(--line-2);
+    color: var(--text); font: 400 12px/18px var(--mono); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  .tip b { font-weight: 500; }
+  .tip .t-m { color: var(--text-3); }
+  .tip .sw { display: inline-block; width: 10px; height: 2px; margin-right: 6px; vertical-align: 3px; background: var(--accent); }
+  .tip .sw.ref { background: var(--text-3); }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+  .tbl th { text-align: left; font: 400 12px/16px var(--mono); color: var(--text-3); padding: 0 12px 8px 0; white-space: nowrap; }
+  .tbl td { padding: 9px 12px 9px 0; border-top: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .tbl td.wrap { white-space: normal; min-width: 140px; }
+  .tbl .r { text-align: right; }
+  .tbl tr.cur td { color: var(--text-2); }
+  .lvl { display: inline-block; min-width: 28px; padding: 0 6px; border-radius: 6px; background: var(--raised); color: var(--text); font: 500 12px/20px var(--mono); text-align: center; }
+  .more { margin-top: 12px; height: 32px; padding: 0 12px; border-radius: 8px; background: transparent; color: var(--text-2); border: 1px solid var(--line-2); font: 400 12px var(--mono); cursor: pointer; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
+  .more:hover { color: var(--text); background: var(--raised); }
+
+  /* bar lists (zones, kills, gold) */
+  .bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .bars li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+  .bars .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+  .bars .nm small { color: var(--text-3); font: 400 12px var(--mono); margin-left: 8px; }
+  .bars .v { color: var(--text-2); font: 400 13px var(--mono); font-variant-numeric: tabular-nums; }
+  .bars .track { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
+  .bars .track span { display: block; height: 100%; border-radius: 3px; background: var(--accent); min-width: 2px; }
+  .tag-s { display: inline-block; margin-left: 8px; padding: 0 6px; border-radius: 4px; background: var(--raised); color: var(--text-2); font: 400 11px/18px var(--mono); vertical-align: 1px; }
+
+  /* small stat rows */
+  .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px 24px; margin: 0 0 16px; }
+  .stat .label { margin: 0 0 2px; }
+  .stat .v { font: 600 22px/1.25 var(--display); letter-spacing: -0.01em; }
+  .stat .v small { font: 500 13px var(--sans); color: var(--text-3); margin-left: 4px; letter-spacing: 0; }
+  .gold-c { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .gold-c i { font-style: normal; color: var(--text-3); margin: 0 3px 0 1px; }
+
+  /* lists */
+  .rows { list-style: none; margin: 0; padding: 0; }
+  .rows li { display: flex; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); min-width: 0; font-size: 14px; line-height: 20px; }
+  .rows li:first-child { border-top: 0; padding-top: 0; }
+  .rows .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .rows .when { flex: none; color: var(--text-3); font: 400 12px var(--mono); white-space: nowrap; }
+  .rows .sub { color: var(--text-3); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { padding: 2px 8px; border-radius: 6px; background: var(--raised); color: var(--text-2); font-size: 12px; line-height: 20px; }
+  .q { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 8px; vertical-align: 1px; flex: none; }
+
+  @media (max-width: 900px) {
+    .shell { padding: 0 16px 48px; }
+    .pages { padding-top: 24px; }
+    .top { padding: 32px 0 32px; }
+    h1 { font-size: 34px; }
+    .meta { flex-direction: column; }
+    .meta { margin-left: 0; clip-path: none; }
+    .meta li::before { content: none; }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .side { position: static; }
+    .tabs { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .tabs a { height: 32px; border: 1px solid var(--line); }
+    .tabs a .i { display: none; }
+    .tabs .n { margin-left: 0; }
+    .toc { display: none; }
+    .hero { grid-template-columns: minmax(0, 1fr); padding: 20px 16px; margin-bottom: 40px; }
+    .big { font-size: 44px; }
+    section.block { margin-bottom: 40px; }
+    .block-head h2 { font-size: 21px; }
+    .card { padding: 14px 16px; }
+    .table-wrap { margin: 0 -16px; padding: 0 16px; }
+    .cards, .cards.two, .grid { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .tiles { grid-template-columns: minmax(0, 1fr); }
+  }
+  /* ---- shared by every page: header support block, search hint, motion ---- */
+  [hidden] { display: none !important; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: end; }
+  .support { width: 320px; display: flex; flex-direction: column; gap: 12px; }
+  .kofi {
+    display: flex; align-items: center; gap: 14px; padding: 14px 18px 14px 16px; border-radius: 12px;
+    background: var(--accent); color: var(--on-accent); text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: background-color 150ms var(--ease), transform 150ms var(--ease);
+  }
+  .kofi:hover { background: var(--accent-hover); }
+  .kofi:active { transform: translateY(1px); }
+  .kofi:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  .kofi .cup { width: 30px; height: 30px; stroke-width: 1.75; overflow: visible; }
+  .kofi .steam { animation: steam 1.6s ease-in-out infinite paused; }
+  .kofi .steam:nth-child(2) { animation-delay: 200ms; }
+  .kofi .steam:nth-child(3) { animation-delay: 400ms; }
+  .kofi:hover .steam, .kofi:focus-visible .steam { animation-play-state: running; }
+  @keyframes steam { 50% { transform: translateY(-2px); opacity: 0.3; } }
+  .kofi b { display: block; font: 700 16px/22px var(--sans); }
+  .kofi small { display: block; font: 500 13px/18px var(--sans); opacity: 0.8; }
+  .kofi .arrow { margin-left: auto; width: 18px; height: 18px; transition: transform 150ms var(--ease); }
+  .kofi:hover .arrow { transform: translate(2px, -2px); }
+  .hire { margin: 0; color: var(--text-2); font-size: 13px; line-height: 20px; }
+  .hire b { color: var(--text); font-weight: 600; }
+  .hire a { color: var(--accent); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .hire a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  .find { position: relative; }
+  .find .search { padding-right: 40px; }
+  .find kbd {
+    position: absolute; right: 8px; top: 8px; min-width: 20px; height: 20px; padding: 0 6px;
+    border: 1px solid var(--line-2); border-radius: 4px; color: var(--text-3);
+    font: 400 12px/18px var(--mono); text-align: center; pointer-events: none;
+    transition: opacity 150ms var(--ease);
+  }
+  .find:focus-within kbd, .find .search:not(:placeholder-shown) ~ kbd { opacity: 0; }
+  @media (hover: none) { .find kbd { display: none; } .find .search { padding-right: 12px; } }
+
+  .enter { animation: card-in 420ms var(--ease) both; animation-delay: calc(var(--i, 0) * 30ms); }
+  @keyframes card-in { from { opacity: 0; transform: translateY(8px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enter, .kofi .steam { animation: none; }
+  }
+  @media (max-width: 900px) {
+    .top { grid-template-columns: minmax(0, 1fr); }
+    .support { width: auto; }
+  }
+  /* ---- shared: avatar, live badge, embers ---- */
+  .embers { position: absolute; left: 0; top: 0; width: 100%; height: 480px; pointer-events: none; z-index: 0; }
+  .shell { position: relative; z-index: 1; }
+  .who { display: flex; align-items: center; gap: 20px; margin: 0 0 16px; }
+  .who h1 { margin: 0; min-width: 0; }
+  .avatar {
+    position: relative; flex: none; width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+    background: var(--raised); box-shadow: 0 0 0 1px var(--line-2);
+    transition: box-shadow 200ms var(--ease), transform 200ms var(--ease);
+  }
+  .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 180ms var(--ease); }
+  .avatar .av-alt { opacity: 0; }
+  .avatar:hover .av-alt, .avatar:focus-visible .av-alt { opacity: 1; }
+  .avatar:hover .av-main, .avatar:focus-visible .av-main { opacity: 0; }
+  .avatar:hover { transform: rotate(-6deg) scale(1.05); }
+  .avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .is-live .avatar { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--bad); }
+  .live {
+    display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px 0 10px; margin: 0 0 16px;
+    border-radius: 999px; background: rgba(229, 72, 77, 0.14); color: var(--text-2); text-decoration: none;
+    font: 500 13px/1 var(--sans); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: background-color 150ms var(--ease);
+  }
+  .live:hover { background: rgba(229, 72, 77, 0.24); }
+  .live b { font-weight: 700; color: #ff7a7e; }
+  .live-dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--bad); animation: live-dot 2s ease-in-out infinite; }
+  @keyframes live-dot { 50% { opacity: 0.3; } }
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot { animation: none; }
+    .avatar:hover { transform: none; }
+  }
+  @media (max-width: 900px) {
+    .who { gap: 16px; }
+    .avatar { width: 56px; height: 56px; }
+  }
+  /* ---- shared: chat commands (config.json "commands") ---- */
+  .cmds { margin-top: 56px; }
+  .cmds h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font: 500 15px/20px var(--sans); margin: 0 0 12px; }
+  .cmds h2 .i { color: var(--accent); }
+  .cmds h2 small { color: var(--text-3); font: 400 13px/20px var(--mono); }
+  .cmds ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 32px; }
+  .cmds li { display: flex; align-items: baseline; gap: 12px; min-width: 0; padding: 10px 0; border-top: 1px solid var(--line); }
+  .cmds code {
+    flex: none; padding: 2px 8px; border-radius: 6px; background: var(--raised); color: var(--text);
+    font: 500 13px/20px var(--mono); box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .cmds li span { min-width: 0; color: var(--text-2); font-size: 14px; line-height: 20px; }
+  .cmds li.here code { box-shadow: inset 0 0 0 1px var(--accent); }
+</style>
+</head>
+<body>
+<canvas class="embers" id="embers" aria-hidden="true"></canvas>
+<div class="shell">
+  <nav class="pages" aria-label="Pages">
+    <a id="to-addons" href="./">Addons</a>
+    <a href="macros.html">Macros</a>
+    <a href="journey.html" aria-current="page">Road to 60</a>
+  </nav>
+  <header class="top">
+    <div class="intro">
+      <a class="live" id="live" target="_blank" rel="noopener" hidden><span class="live-dot"></span><b>Live on Twitch</b><span id="live-info"></span></a>
+      <div class="who">
+        <a class="avatar" id="avatar" target="_blank" rel="noopener" hidden>
+          <img class="av-main" src="assets/avatar-keks.webp" alt="" width="72" height="72">
+          <img class="av-alt" src="assets/avatar-nerdge.webp" alt="" width="72" height="72" loading="lazy">
+        </a>
+        <h1 id="title">Road to 60</h1>
+      </div>
+      <ul class="meta" id="meta"></ul>
+    </div>
+    <div class="support" id="support" hidden>
+      <a class="kofi" id="kofi" target="_blank" rel="noopener" hidden>
+        <svg class="i cup" viewBox="0 0 24 24" aria-hidden="true"><path class="steam" d="M6 2v2"/><path class="steam" d="M10 2v2"/><path class="steam" d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/></svg>
+        <span><b>Support me on Ko-fi</b><small id="kofi-note"></small></span>
+        <svg class="i arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+      </a>
+      <p class="hire" id="hire" hidden></p>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="side" id="side" hidden>
+      <nav aria-label="Characters"><ul class="tabs" id="tabs"></ul></nav>
+      <nav aria-label="On this page"><ul class="toc" id="toc"></ul></nav>
+    </aside>
+    <main id="main"></main>
+  </div>
+  <section class="cmds" id="cmds" hidden></section>
+  <footer>Read from AutoBiographer and my RoadTo60 addon, updated automatically</footer>
+</div>
+
+<script>
+window.JOURNEY_DATA = {"journey":{"characters":[],"current":null,"main":null,"xpTable":[400,900,1400,2100,2800,3600,4500,5400,6500,7600,8800,10100,11400,12900,14400,16000,17700,19400,21300,23200,25200,27300,29400,31700,34000,36400,38900,41400,44300,47400,50800,54500,58600,62800,67100,71600,76100,80800,85700,90700,95800,101000,106300,111800,117500,123200,129100,135100,141200,147500,153900,160400,167100,173900,180800,187900,195000,202300,209800],"referenceHours":140,"typical":[[0,1],[0.112,2],[0.336,3],[0.651,4],[1.078,5],[1.597,6],[2.208,7],[2.911,8],[3.69,9],[4.561,10],[5.507,11],[6.531,12],[7.63,13],[8.794,14],[10.033,15],[11.336,16],[12.703,17],[14.134,18],[15.62,19],[17.169,20],[18.772,21],[20.43,22],[22.143,23],[23.902,24],[25.715,25],[27.575,26],[29.482,27],[31.436,28],[33.43,29],[35.48,30],[37.588,31],[39.762,32],[42.007,33],[44.332,34],[46.736,35],[49.213,36],[51.782,37],[54.454,38],[57.231,39],[60.115,40],[63.106,41],[66.203,42],[69.405,43],[72.71,44],[76.121,45],[79.641,46],[83.264,47],[86.995,48],[90.83,49],[94.77,50],[98.817,51],[102.97,52],[107.227,53],[111.592,54],[116.062,55],[120.638,56],[125.321,57],[130.108,58],[135,59],[140,60]],"halfLifeHours":24},"pageTitle":"Road to 60 \u0026 Beyond!","streamerName":"Saltydayn","twitchUrl":"https://www.twitch.tv/saltydayn","support":{"kofiUrl":"https://ko-fi.com/saltydayn","kofiNote":"95% goes straight to me","linktreeUrl":"https://saltydayn.pages.dev","commissions":"Custom IT solutions, stream assets, WoW addons and more."},"gameLabel":"WoW Forever","addonsUrl":"./","pageUrl":"https://saltydayn.github.io/addons/journey.html","commands":[{"command":"!addons","text":"Link to my addon list"},{"command":"!macros","text":"Link to my macros"},{"command":"!journey","text":"Link to my Road to 60 page"},{"command":"!eta","text":"How long until I hit 60, at my current pace"},{"command":"!level","text":"My level and time played right now"},{"command":"!r60","text":"Road to 60 for one character: !r60 rogue or !r60 \u003cname\u003e"}],"generated":"2026-11-04T10:59:31.8617398Z"};
+</script>
+<script>
+(function () {
+  "use strict";
+  var D = window.JOURNEY_DATA;
+  var $ = function (id) { return document.getElementById(id); };
+  // Accept arrays that Windows PowerShell 5.1 wrapped as {"value":[...]}
+  function arr(x) { return Array.isArray(x) ? x : (x && Array.isArray(x.value) ? x.value : []); }
+  var mainEl = $("main");
+
+  if (!D || !D.journey) {
+    mainEl.innerHTML = '<p class="empty">No journey data yet. Run Update-JourneyList.ps1 to build this page.</p>';
+    return;
+  }
+  // Local preview (output\journey.html) has no web server, so link the file itself
+  $("to-addons").href = location.protocol === "file:" ? "index.html" : (D.addonsUrl || "./");
+
+  var J = D.journey;
+  var chars = arr(J.characters);
+  var typical = arr(J.typical);
+
+  // ------------------------------------------------------------ helpers
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var ICONS = {
+    "user": '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+    "chev": '<path d="m9 18 6-6-6-6"/>',
+    "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+  };
+  function icon(name) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true");
+    s.setAttribute("class", "i");
+    s.innerHTML = ICONS[name];
+    return s;
+  }
+  var CLASS = {
+    warrior: "#c69b6d", paladin: "#f48cba", hunter: "#aad372", rogue: "#fff468", priest: "#ffffff",
+    shaman: "#0070dd", mage: "#3fc7eb", warlock: "#8788ee", druid: "#ff7c0a"
+  };
+  // WoW item quality colors, used only as small markers next to item names
+  var QUALITY = ["#9d9d9d", "#ffffff", "#1eff00", "#0070dd", "#a335ee", "#ff8000", "#e6cc80"];
+  function classColor(c) { return CLASS[String(c.classFile || c.className || "").toLowerCase()]; }
+
+  function num(n) { return Math.round(n || 0).toLocaleString("en-US"); }
+  function compact(n) {
+    n = n || 0;
+    var a = Math.abs(n);
+    if (a >= 1e6) return (n / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M";
+    if (a >= 1e4) return Math.round(n / 1e3) + "k";
+    if (a >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "k";
+    return String(Math.round(n));
+  }
+  // seconds -> "34h 12m"
+  function dur(s) {
+    s = Math.max(0, Math.round(s || 0));
+    var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+    if (h >= 100) return num(h) + "h";
+    if (h) return h + "h " + m + "m";
+    if (m) return m + "m";
+    return s + "s";
+  }
+  // hours -> "~31h" style, like the chat command
+  function hrs(h) {
+    if (h < 1) return Math.max(1, Math.round(h * 60)) + " min";
+    if (h < 10) return (Math.round(h * 10) / 10) + "h";
+    return Math.round(h) + "h";
+  }
+  function rangeH(lo, hi) {
+    if (hi < 1) return Math.max(1, Math.round(lo * 60)) + "–" + Math.round(hi * 60) + " min";
+    var f = function (x) { return x < 10 ? String(Math.round(x * 10) / 10) : String(Math.round(x)); };
+    return f(lo) + "–" + f(hi) + "h";
+  }
+  function goldNode(copper) {
+    copper = Math.max(0, Math.round(copper || 0));
+    var g = Math.floor(copper / 10000), s = Math.floor(copper % 10000 / 100), c = copper % 100;
+    var span = el("span", "gold-c");
+    function part(v, u) { span.appendChild(document.createTextNode(g >= 1000 && u === "g" ? num(v) : String(v))); span.appendChild(el("i", null, u)); }
+    if (g) { part(g, "g"); if (g < 1000) part(s, "s"); }
+    else if (s) { part(s, "s"); part(c, "c"); }
+    else part(c, "c");
+    return span;
+  }
+  function km(yards) { var k = (yards || 0) * 0.9144 / 1000; return k >= 10 ? Math.round(k) + " km" : (Math.round(k * 10) / 10) + " km"; }
+
+  var NOW = Date.now(), YEAR = new Date().getFullYear();
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function day(unix) {
+    if (!unix) return "";
+    var d = new Date(unix * 1000);
+    return MONTHS[d.getMonth()] + " " + d.getDate() + (d.getFullYear() !== YEAR ? ", " + d.getFullYear() : "");
+  }
+  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat("en", { numeric: "auto" }) : null;
+  function ago(ms) {
+    if (!ms || isNaN(ms)) return "";
+    var s = Math.round((ms - NOW) / 1000), a = Math.abs(s);
+    if (a < 60) return "just now";
+    var steps = [[3600, 60, "minute"], [86400, 3600, "hour"], [604800, 86400, "day"], [2629800, 604800, "week"], [31557600, 2629800, "month"], [Infinity, 31557600, "year"]];
+    for (var i = 0; i < steps.length; i++) {
+      if (a < steps[i][0]) {
+        var v = Math.round(s / steps[i][1]);
+        if (rtf) return rtf.format(v, steps[i][2]);
+        v = Math.abs(v); return v + " " + steps[i][2] + (v === 1 ? "" : "s") + " ago";
+      }
+    }
+    return "";
+  }
+  function agoUnix(unix) { return unix ? ago(unix * 1000) : ""; }
+  // "Dec 1\u201319", "Nov 28\u2013Dec 4"; the year only when it isn't this year
+  function dayRange(a, b) {
+    var x = new Date(a * 1000), y = new Date(b * 1000), yr = y.getFullYear() !== YEAR ? ", " + y.getFullYear() : "";
+    if (x.getFullYear() !== y.getFullYear()) return day(a) + "\u2013" + day(b);
+    if (x.getMonth() === y.getMonth()) return x.getDate() === y.getDate() ? day(b) : MONTHS[x.getMonth()] + " " + x.getDate() + "\u2013" + y.getDate() + yr;
+    return MONTHS[x.getMonth()] + " " + x.getDate() + "\u2013" + MONTHS[y.getMonth()] + " " + y.getDate() + yr;
+  }
+
+  // ------------------------------------------------------------ header
+  var title = D.pageTitle || "Road to 60";
+  $("title").textContent = title;
+  document.title = title;
+  var meta = $("meta");
+  function metaItem(node) { var li = el("li"); li.appendChild(typeof node === "string" ? document.createTextNode(node) : node); meta.appendChild(li); }
+  function bold(text, after) { var f = document.createDocumentFragment(); f.appendChild(el("b", null, text)); if (after) f.appendChild(document.createTextNode(after)); return f; }
+  metaItem(D.gameLabel || "WoW Forever");
+  var updated = Date.parse(D.generated);
+  if (updated && ago(updated)) metaItem("updated " + ago(updated));
+
+  if (!chars.length) {
+    var box = el("div", "hero");
+    var left = el("div");
+    left.appendChild(el("p", "label", "Time to 60"));
+    left.appendChild(el("p", "big", "Soon"));
+    left.appendChild(el("p", "range", "The journey starts at launch. This page fills in after the first logout or /reload with AutoBiographer and the RoadTo60 addon running."));
+    box.appendChild(left);
+    mainEl.appendChild(box);
+    return;
+  }
+
+  chars.forEach(function (c) {
+    ["levels", "curve", "deaths", "zones", "dungeons", "bosses", "highlights", "professions", "gear"].forEach(function (k) { c[k] = arr(c[k]); });
+    c.eta = c.eta || {};
+    c.eta.projection = arr(c.eta.projection); c.eta.paceHistory = arr(c.eta.paceHistory);
+    c.quests = c.quests || {}; c.quests.biggest = arr(c.quests.biggest); c.quests.recent = arr(c.quests.recent);
+    c.kills = c.kills || {}; c.kills.top = arr(c.kills.top);
+    c.grouped = c.grouped || {}; c.grouped.top = arr(c.grouped.top);
+    c.xp = c.xp || {}; c.money2 = c.money2 || {}; c.time = c.time || {}; c.distance = c.distance || {}; c.misc = c.misc || {};
+    c.label = c.fullName || c.name;
+  });
+  var byKey = {};
+  chars.forEach(function (c) { byKey[c.key] = c; });
+  var mainChar = byKey[J.main];
+  if (mainChar) metaItem(bold(mainChar.label, " is my main"));
+
+  // ------------------------------------------------------------ character tabs + on this page
+  var tabs = $("tabs"), links = {};
+  chars.forEach(function (c) {
+    var li = el("li"), a = el("a");
+    a.href = "#" + c.key;
+    var col = classColor(c);
+    if (col) { var dot = el("span", "dot"); dot.style.background = col; dot.title = c.className; a.appendChild(dot); a.classList.add("cls"); a.style.setProperty("--cls", col); }
+    else a.appendChild(icon("user"));
+    a.appendChild(el("span", "label", c.label));
+    if (c.isMain) a.appendChild(el("span", "main-tag", "main"));
+    a.appendChild(el("span", "n", String(c.level)));
+    a.title = c.label + " · level " + c.level + (c.className ? " " + c.className : "");
+    li.appendChild(a); tabs.appendChild(li);
+    links[c.key] = a;
+  });
+  var SECTIONS = [["overview", "Time to 60"], ["pace", "Pace"], ["levels", "Levels"], ["deaths", "Deaths"], ["zones", "Zones"],
+    ["dungeons", "Dungeons"], ["quests", "Quests & kills"], ["gold", "Gold"], ["travel", "Time & travel"], ["beyond", "Beyond 60"]];
+  var toc = $("toc");
+  SECTIONS.forEach(function (s) {
+    var li = el("li"), a = el("a", null, s[1]);
+    a.href = "#" + s[0];
+    a.addEventListener("click", function (e) {
+      var t = $("s-" + s[0]);
+      if (t) { e.preventDefault(); t.scrollIntoView({ behavior: still() ? "auto" : "smooth", block: "start" }); }
+    });
+    li.appendChild(a); toc.appendChild(li);
+  });
+  $("side").hidden = false;
+  function still() { return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); }
+
+  // ------------------------------------------------------------ building blocks
+  function block(id, h, sub) {
+    var sec = el("section", "block"); sec.id = "s-" + id;
+    var head = el("div", "block-head");
+    head.appendChild(el("h2", null, h));
+    if (sub) head.appendChild(el("span", "sub", sub));
+    sec.appendChild(head);
+    return sec;
+  }
+  function stat(label, value, small) {
+    var d = el("div", "stat");
+    d.appendChild(el("p", "label", label));
+    var v = el("div", "v");
+    if (value && value.nodeType) v.appendChild(value); else v.textContent = value;
+    if (small) v.appendChild(el("small", null, small));
+    d.appendChild(v);
+    return d;
+  }
+  function barList(items, fmt) {
+    var ul = el("ul", "bars");
+    var max = items.reduce(function (m, x) { return Math.max(m, x.value); }, 0) || 1;
+    items.forEach(function (x) {
+      var li = el("li"), nm = el("span", "nm", x.name);
+      if (x.note) nm.appendChild(el("small", null, x.note));
+      if (x.tag) nm.appendChild(el("span", "tag-s", x.tag));
+      li.appendChild(nm);
+      var v = el("span", "v");
+      var f = fmt(x.value);
+      if (f && f.nodeType) v.appendChild(f); else v.textContent = f;
+      li.appendChild(v);
+      var tr = el("span", "track"), fill = el("span");
+      fill.style.width = (x.value / max * 100).toFixed(2) + "%";
+      tr.appendChild(fill); li.appendChild(tr);
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+  function moreButton(wrap, total, shown, label, render) {
+    if (total <= shown) return;
+    var b = el("button", "more", "Show all " + total + " " + label);
+    b.type = "button";
+    b.addEventListener("click", function () { render(total); b.remove(); });
+    wrap.appendChild(b);
+  }
+
+  // ------------------------------------------------------------ charts (inline SVG, hover tooltip)
+  function niceStep(span, target) {
+    var raw = span / Math.max(1, target), p = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), m = raw / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+  }
+  function ticks(min, max, target) {
+    var st = niceStep(max - min, target), out = [];
+    for (var v = Math.ceil(min / st) * st; v <= max + 1e-9; v += st) out.push(Math.round(v * 1000) / 1000);
+    return out;
+  }
+  function hTick(h) { return h >= 1000 ? compact(h) + "h" : (Math.round(h * 10) / 10) + "h"; }
+  // y at x on a polyline sorted by x
+  function interp(pts, x) {
+    if (!pts.length || x < pts[0][0] || x > pts[pts.length - 1][0]) return null;
+    for (var i = 1; i < pts.length; i++) {
+      if (pts[i][0] >= x) {
+        var a = pts[i - 1], b = pts[i], t = b[0] === a[0] ? 1 : (x - a[0]) / (b[0] - a[0]);
+        return a[1] + (b[1] - a[1]) * t;
+      }
+    }
+    return pts[pts.length - 1][1];
+  }
+
+  var redraws = [];
+  window.addEventListener("resize", function () {
+    clearTimeout(window.__r60r);
+    window.__r60r = setTimeout(function () { redraws.forEach(function (f) { f(); }); }, 120);
+  });
+
+  // Generic x/y chart. opts: { xMax, yMin, yMax, yFmt, xFmt, draw(ctx) -> svg string, hover(x) -> html|null, label }
+  function chart(host, opts) {
+    var box = el("div", "chart");
+    box.setAttribute("role", "img");
+    box.setAttribute("aria-label", opts.label);
+    host.appendChild(box);
+    var tip = el("div", "tip"); tip.hidden = true;
+    function render() {
+      var W = Math.max(280, box.clientWidth || host.clientWidth || 600);
+      var H = W < 560 ? 220 : 280;
+      var m = { l: 40, r: opts.rightPad || 16, t: 12, b: 28 };
+      var iw = W - m.l - m.r, ih = H - m.t - m.b;
+      var X = function (v) { return m.l + v / opts.xMax * iw; };
+      var Y = function (v) { return m.t + ih - (v - opts.yMin) / (opts.yMax - opts.yMin) * ih; };
+      var s = '<svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" aria-hidden="true">';
+      ticks(opts.yMin, opts.yMax, ih < 180 ? 4 : 5).forEach(function (v) {
+        s += '<line class="grid-l" x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/>';
+        s += '<text class="axis-t" x="' + (m.l - 8) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + esc(opts.yFmt(v)) + "</text>";
+      });
+      ticks(0, opts.xMax, Math.max(3, Math.floor(iw / 90))).forEach(function (v) {
+        s += '<text class="axis-t" x="' + X(v) + '" y="' + (H - 8) + '" text-anchor="middle">' + esc(opts.xFmt(v)) + "</text>";
+      });
+      s += opts.draw({ X: X, Y: Y, W: W, H: H, m: m, iw: iw, ih: ih });
+      s += '<line class="cross" id="" x1="0" x2="0" y1="' + m.t + '" y2="' + (m.t + ih) + '" visibility="hidden"/>';
+      s += '<rect class="hit" x="' + m.l + '" y="' + m.t + '" width="' + iw + '" height="' + ih + '"/>';
+      s += "</svg>";
+      box.innerHTML = s;
+      box.appendChild(tip);
+      var svg = box.querySelector("svg"), cross = box.querySelector(".cross"), hit = box.querySelector(".hit");
+      function move(ev) {
+        var r = svg.getBoundingClientRect();
+        var px = (ev.clientX - r.left) * (W / r.width);
+        var xv = Math.max(0, Math.min(opts.xMax, (px - m.l) / iw * opts.xMax));
+        var res = opts.hover(xv);
+        if (!res) { leave(); return; }
+        var cx = res.x != null ? X(res.x) : px;
+        cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("visibility", "visible");
+        tip.innerHTML = res.html; tip.hidden = false;
+        var bw = box.clientWidth, tw = tip.offsetWidth, sx = cx * (r.width / W);
+        var left = sx + 14; if (left + tw > bw) left = sx - tw - 14; if (left < 0) left = 0;
+        tip.style.left = left + "px"; tip.style.top = "8px";
+      }
+      function leave() { tip.hidden = true; cross.setAttribute("visibility", "hidden"); }
+      hit.addEventListener("pointermove", move);
+      hit.addEventListener("pointerdown", move);
+      hit.addEventListener("pointerleave", leave);
+    }
+    render();
+    redraws.push(render);
+  }
+  function path(pts, X, Y) {
+    return pts.map(function (p, i) { return (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1); }).join("");
+  }
+
+  // ------------------------------------------------------------ one character
+  function render(c) {
+    redraws = [];
+    mainEl.innerHTML = "";
+    var e = c.eta, done = c.level >= 60 || e.status === "done";
+
+    // ---- hero: time to 60
+    var hero = el("section", "hero"); hero.id = "s-overview";
+    var left = el("div");
+    if (done) {
+      left.appendChild(el("p", "label", "Reached 60 in"));
+      var bigD = el("p", "big", c.reached60Played ? dur(c.reached60Played) : "60");
+      bigD.appendChild(el("small", null, "of /played"));
+      left.appendChild(bigD);
+      left.appendChild(el("p", "range", c.reached60At ? "Dinged 60 on " + day(c.reached60At) + ". Now on to the beyond part." : "Max level. Now on to the beyond part."));
+    } else if (e.status === "nodata") {
+      left.appendChild(el("p", "label", "Time to 60"));
+      left.appendChild(el("p", "big", "Soon"));
+      left.appendChild(el("p", "range", "No /played history yet. The estimate appears after the next /reload or logout."));
+    } else {
+      left.appendChild(el("p", "label", "Time to 60, in /played"));
+      var big = el("p", "big", "~" + hrs(e.hours));
+      big.appendChild(el("small", null, "left"));
+      left.appendChild(big);
+      var rg = el("p", "range");
+      rg.appendChild(document.createTextNode("Likely "));
+      rg.appendChild(el("b", null, rangeH(e.low, e.high)));
+      if (e.date) {
+        rg.appendChild(document.createTextNode(" · around "));
+        rg.appendChild(el("b", null, day(e.date)));
+        rg.appendChild(document.createTextNode(" (" + dayRange(e.dateLow, e.dateHigh) + ") at ~" + hrs(e.playedPerDay / 3600) + " a day"));
+      }
+      left.appendChild(rg);
+      if (e.status === "early") {
+        var st = el("p", "status"); st.appendChild(icon("info"));
+        st.appendChild(document.createTextNode("Early days: this leans on a typical player's pace until there are a few levels of my own."));
+        left.appendChild(st);
+      }
+      var how = el("details", "how");
+      var sm = el("summary"); sm.appendChild(icon("chev")); sm.appendChild(document.createTextNode("How this is worked out"));
+      how.appendChild(sm);
+      var p1 = el("p");
+      p1.innerHTML = "Only <b>/played</b> counts, so sleep and breaks don't. Each stretch of play is compared with a typical player's time for the same XP, and recent play counts most: the last " +
+        esc(J.halfLifeHours || 24) + "h of /played weighs double the " + esc(J.halfLifeHours || 24) + "h before. Right now I level at <b>" +
+        (Math.round((e.pace || 1) * 100) / 100) + "×</b> a typical player's pace" +
+        (e.trendPerLevel ? ", and that is " + (e.trendPerLevel > 0 ? "rising" : "falling") + " by about <b>" + Math.abs(Math.round(e.trendPerLevel * 1000) / 10) + "%</b> per level" : "") + ".";
+      how.appendChild(p1);
+      var p2 = el("p");
+      p2.innerHTML = "The range is where the real number should land about 8 times out of 10. It narrows as levels pile up. Based on <b>" +
+        dur((e.dataHours || 0) * 3600) + "</b> of tracked play; XP needed per level is the Classic table, which WoW Forever kept.";
+      how.appendChild(p2);
+      left.appendChild(how);
+    }
+    hero.appendChild(left);
+
+    var tiles = el("div", "tiles");
+    function tile(label, val, small, foot, extra) {
+      var t = el("div", "tile");
+      t.appendChild(el("p", "label", label));
+      var v = el("div", "val", val); if (small) v.appendChild(el("small", null, small));
+      t.appendChild(v);
+      if (extra) t.appendChild(extra);
+      if (foot) t.appendChild(el("p", "foot", foot));
+      tiles.appendChild(t);
+    }
+    var xbar = null, xfoot = "";
+    if (!done) {
+      xbar = el("div", "xpbar");
+      xbar.setAttribute("role", "img");
+      xbar.setAttribute("aria-label", Math.floor(c.xp.pct || 0) + "% of level " + c.level + (c.xp.rested ? ", plus rested XP" : ""));
+      var pct = Math.max(0, Math.min(100, c.xp.pct || 0));
+      var restPct = c.xp.need ? Math.min(100 - pct, (c.xp.rested || 0) / c.xp.need * 100) : 0;
+      var f = el("span", "fill"); f.style.width = pct + "%"; xbar.appendChild(f);
+      if (restPct > 0) { var rs = el("span", "rest"); rs.style.left = pct + "%"; rs.style.width = restPct + "%"; xbar.appendChild(rs); }
+      xfoot = Math.floor(pct) + "% · " + compact(c.xp.into) + " / " + compact(c.xp.need) + " XP" + (c.xp.rested ? " · " + compact(c.xp.rested) + " rested" : "");
+    } else xfoot = [c.race, c.className].filter(Boolean).join(" ");
+    tile("Level", String(c.level), done ? "" : [c.race, c.className].filter(Boolean).join(" "), xfoot, xbar);
+    tile("Time played", dur(c.played), "", c.lastSeen ? "last played " + agoUnix(c.lastSeen) : "");
+    if (!done && e.xpPerHourNow) tile("XP per hour", compact(e.xpPerHourLast24 || e.xpPerHourNow), "", "last 24h of /played · " + compact(e.xpPerHourNow) + " recency-weighted");
+    else tile("Levels tracked", String(c.levels.length), "", c.levels.length ? "from level " + c.levels[0].level : "");
+    var lastDeath = c.deaths.length ? c.deaths[c.deaths.length - 1] : null;
+    tile("Deaths", num(c.deathTotal), "", lastDeath ? "last: " + (lastDeath.killer || "unknown") + (lastDeath.level ? " at level " + lastDeath.level : "") : "none yet");
+    hero.appendChild(tiles);
+    mainEl.appendChild(hero);
+
+    // ---- pace: level over /played + time per level + XP/h
+    var pace = block("pace", "Pace", "level against /played, with the forecast to 60");
+    var curve = c.curve.slice();
+    var proj = e.projection;
+    var lastPlayed = (c.played || 0) / 3600;
+    var fcMid = [], fcLow = [], fcHigh = [];
+    if (!done && proj.length > 1 && e.status !== "nodata") {
+      proj.forEach(function (p) { fcMid.push([p[1], p[0]]); fcLow.push([p[2], p[0]]); fcHigh.push([p[3], p[0]]); });
+    }
+    var xMax = Math.max(lastPlayed, fcHigh.length ? fcHigh[fcHigh.length - 1][0] : 0, curve.length ? curve[curve.length - 1][0] : 0, 1);
+    var typ = typical.filter(function (p) { return p[0] <= xMax * 1.02; });
+    var card = el("div", "card chart-card");
+    var hd = el("div", "chart-head"); hd.appendChild(el("h3", null, "Level by time played"));
+    var lg = el("ul", "legend");
+    function lgItem(cls, text) { var li = el("li"); li.appendChild(el("span", "key " + cls)); li.appendChild(document.createTextNode(text)); lg.appendChild(li); }
+    lgItem("", c.name);
+    if (fcMid.length) { lgItem("dash", "Forecast"); lgItem("band", "Likely range"); }
+    lgItem("ref", "Typical player");
+    hd.appendChild(lg); card.appendChild(hd);
+    pace.appendChild(card);
+    mainEl.appendChild(pace);
+    if (curve.length || fcMid.length) {
+      chart(card, {
+        label: "Line chart of level against hours played, with a forecast to level 60",
+        xMax: xMax, yMin: 1, yMax: 60, rightPad: 28,
+        yFmt: function (v) { return String(v); }, xFmt: hTick,
+        draw: function (g) {
+          var s = "";
+          if (fcLow.length) s += '<path class="band" d="' + path(fcLow, g.X, g.Y) + path(fcHigh.slice().reverse(), g.X, g.Y).replace(/^M/, "L") + 'Z"/>';
+          if (typ.length) s += '<path class="s-ref" d="' + path(typ, g.X, g.Y) + '"/>';
+          if (fcMid.length) s += '<path class="s-fc" d="' + path(fcMid, g.X, g.Y) + '"/>';
+          if (curve.length) {
+            s += '<path class="s-you" d="' + path(curve, g.X, g.Y) + '"/>';
+            var lp = curve[curve.length - 1];
+            s += '<circle class="end" cx="' + g.X(lp[0]) + '" cy="' + g.Y(lp[1]) + '" r="5"/>';
+            if (!fcMid.length) s += '<text class="end-t" x="' + (g.X(lp[0]) - 8) + '" y="' + (g.Y(lp[1]) - 10) + '" text-anchor="end">' + esc(Math.floor(lp[1])) + "</text>";
+          }
+          if (fcMid.length) {
+            var fp = fcMid[fcMid.length - 1];
+            s += '<text class="end-t" x="' + (g.X(fp[0]) - 6) + '" y="' + (g.Y(60) - 8) + '" text-anchor="end">60 at ~' + esc(hTick(fp[0])) + "</text>";
+          }
+          return s;
+        },
+        hover: function (x) {
+          var you = interp(curve, x), fc = interp(fcMid, x), lo = interp(fcHigh, x), hi = interp(fcLow, x), t = interp(typ, x);
+          var h = "<b>" + esc(dur(x * 3600)) + "</b> played";
+          if (you != null) h += '<br><span class="sw"></span>' + esc(c.name) + ": level " + esc(Math.floor(you)) + ' <span class="t-m">(' + esc(Math.round((you % 1) * 100)) + "%)</span>";
+          else if (fc != null) h += '<br><span class="sw"></span>Forecast: level ' + esc(Math.floor(fc)) + (lo != null && hi != null ? ' <span class="t-m">(' + esc(Math.floor(lo)) + "–" + esc(Math.floor(hi)) + ")</span>" : "");
+          if (t != null) h += '<br><span class="sw ref"></span>Typical: level ' + esc(Math.floor(t));
+          return { html: h };
+        }
+      });
+    } else card.appendChild(el("p", "empty", "The curve appears after the first few levels."));
+
+    // time per level (columns)
+    var lv = c.levels.filter(function (r) { return r.duration != null && r.level < 60; });
+    if (lv.length) {
+      var card2 = el("div", "card chart-card"); card2.style.marginTop = "12px";
+      var hd2 = el("div", "chart-head"); hd2.appendChild(el("h3", null, "Time per level"));
+      hd2.appendChild(el("span", "sub muted mono", "hover a bar for details"));
+      card2.appendChild(hd2); pace.appendChild(card2);
+      var maxLevel = Math.max(lv[lv.length - 1].level + 1, Math.min(60, c.level + 1));
+      var minLevel = lv[0].level;
+      var yMaxH = lv.reduce(function (mx, r) { return Math.max(mx, r.duration / 3600); }, 0) || 1;
+      var byLevel = {}; lv.forEach(function (r) { byLevel[r.level] = r; });
+      chart(card2, {
+        label: "Column chart of hours spent at each level",
+        xMax: maxLevel - minLevel, yMin: 0, yMax: yMaxH * 1.08,
+        yFmt: hTick, xFmt: function (v) { return "L" + (Math.round(v) + minLevel); },
+        draw: function (g) {
+          var n = maxLevel - minLevel, slot = g.iw / n, w = Math.max(2, Math.min(24, slot - 2)), s = "";
+          lv.forEach(function (r) {
+            var x = g.X(r.level - minLevel + 0.5) - w / 2, y = g.Y(r.duration / 3600), y0 = g.Y(0), hgt = Math.max(1, y0 - y);
+            var rr = Math.min(4, w / 2, hgt);
+            // rounded data end, square at the baseline
+            s += '<path class="col' + (r.complete ? "" : " now") + '" d="M' + x.toFixed(1) + " " + y0 + "V" + (y + rr).toFixed(1) + "Q" + x.toFixed(1) + " " + y.toFixed(1) + " " + (x + rr).toFixed(1) + " " + y.toFixed(1) +
+              "H" + (x + w - rr).toFixed(1) + "Q" + (x + w).toFixed(1) + " " + y.toFixed(1) + " " + (x + w).toFixed(1) + " " + (y + rr).toFixed(1) + "V" + y0 + 'Z"/>';
+          });
+          return s;
+        },
+        hover: function (x) {
+          var L = Math.floor(x) + minLevel, r = byLevel[L];
+          if (!r) return null;
+          var h = "<b>Level " + esc(L) + "</b>" + (r.complete ? "" : ' <span class="t-m">in progress</span>');
+          h += "<br>" + esc(dur(r.duration)) + (r.refHours ? ' <span class="t-m">(typical ' + esc(dur(r.refHours * 3600)) + ")</span>" : "");
+          if (r.xpPerHour) h += "<br>" + esc(compact(r.xpPerHour)) + " XP/h";
+          if (r.reachedAt) h += '<br><span class="t-m">reached ' + esc(day(r.reachedAt)) + "</span>";
+          if (r.zone) h += '<br><span class="t-m">mostly in ' + esc(r.zone) + "</span>";
+          return { html: h, x: L - minLevel + 0.5 };
+        }
+      });
+    }
+
+    // XP per hour over /played (20-minute stretches, lightly smoothed)
+    var ph = e.paceHistory;
+    if (!done && ph.length >= 3) {
+      var sm3 = ph.map(function (p, i) {
+        var a = ph[Math.max(0, i - 1)], b = ph[Math.min(ph.length - 1, i + 1)];
+        return [p[0], (a[2] + p[2] + b[2]) / 3, p[1]];
+      });
+      var card3 = el("div", "card chart-card"); card3.style.marginTop = "12px";
+      var hd3 = el("div", "chart-head"); hd3.appendChild(el("h3", null, "XP per hour of /played"));
+      hd3.appendChild(el("span", "sub muted mono", "rises as mobs and quests give more"));
+      card3.appendChild(hd3); pace.appendChild(card3);
+      var yMaxX = sm3.reduce(function (mx, p) { return Math.max(mx, p[1]); }, 0) || 1;
+      var xMaxX = Math.max(sm3[sm3.length - 1][0], 1);
+      var line = sm3.map(function (p) { return [p[0], p[1]]; });
+      chart(card3, {
+        label: "Line chart of XP per hour over time played",
+        xMax: xMaxX, yMin: 0, yMax: yMaxX * 1.1,
+        yFmt: compact, xFmt: hTick,
+        draw: function (g) {
+          var lp = line[line.length - 1];
+          return '<path class="s-you" d="' + path(line, g.X, g.Y) + '"/><circle class="end" cx="' + g.X(lp[0]) + '" cy="' + g.Y(lp[1]) + '" r="5"/>';
+        },
+        hover: function (x) {
+          var best = sm3[0];
+          sm3.forEach(function (p) { if (Math.abs(p[0] - x) < Math.abs(best[0] - x)) best = p; });
+          return { x: best[0], html: "<b>" + esc(compact(best[1])) + " XP/h</b><br>" + '<span class="t-m">at ' + esc(dur(best[0] * 3600)) + " played · level " + esc(Math.floor(best[2])) + "</span>" };
+        }
+      });
+    }
+
+    // ---- level table
+    var levels = block("levels", "Levels", c.levels.length ? c.levels.length + " tracked" : "");
+    var lcard = el("div", "card");
+    if (c.levels.length) {
+      var wrap = el("div", "table-wrap"), tbl = el("table", "tbl");
+      tbl.innerHTML = "<thead><tr><th>Level</th><th>Reached</th><th class=\"r\">Played then</th><th class=\"r\">Time at level</th><th class=\"r\">XP/h</th><th class=\"r\">Kills</th><th class=\"r\">Deaths</th><th class=\"r\">Quests</th><th>Mostly in</th></tr></thead>";
+      var tb = el("tbody"); tbl.appendChild(tb);
+      var rows = c.levels.slice().reverse();
+      var fill = function (n) {
+        tb.innerHTML = "";
+        rows.slice(0, n).forEach(function (r) {
+          var tr = el("tr", r.complete ? "" : "cur");
+          var td = function (t, cls) { var d = el("td", cls, t); tr.appendChild(d); return d; };
+          var l = el("td"); l.appendChild(el("span", "lvl", String(r.level))); tr.appendChild(l);
+          td(r.reachedAt ? day(r.reachedAt) : "—");
+          td(r.playedAt != null ? dur(r.playedAt) : "—", "r");
+          td(r.duration != null ? dur(r.duration) + (r.complete ? "" : " so far") : "—", "r");
+          td(r.xpPerHour ? compact(r.xpPerHour) : "—", "r");
+          td(num(r.kills), "r"); td(num(r.deaths), "r"); td(num(r.quests), "r");
+          td(r.zone || "—", "wrap");
+          tb.appendChild(tr);
+        });
+      };
+      fill(12);
+      wrap.appendChild(tbl); lcard.appendChild(wrap);
+      moreButton(lcard, rows.length, 12, "levels", fill);
+    } else lcard.appendChild(el("p", "empty", "No levels tracked yet."));
+    levels.appendChild(lcard);
+    mainEl.appendChild(levels);
+
+    // ---- deaths
+    var deaths = block("deaths", "Deaths", c.deathTotal ? num(c.deathTotal) + " total" : "none yet");
+    if (c.deaths.length || c.deathTotal) {
+      var dc = c.deathCauses || {};
+      var dstats = el("div", "stats");
+      dstats.appendChild(stat("To creatures", num(dc.creature)));
+      dstats.appendChild(stat("Falling, drowning, lava", num(dc.environment)));
+      dstats.appendChild(stat("To other players", num(dc.player)));
+      if (c.time.dead) dstats.appendChild(stat("Time spent dead", dur(c.time.dead)));
+      deaths.appendChild(dstats);
+      var dcard = el("div", "card"), dul = el("ul", "rows");
+      var dl = c.deaths.slice().reverse();
+      var fillD = function (n) {
+        dul.innerHTML = "";
+        dl.slice(0, n).forEach(function (d) {
+          var li = el("li");
+          li.appendChild(el("span", "lvl", d.level ? String(d.level) : "?"));
+          var g = el("span", "grow");
+          g.appendChild(document.createTextNode(d.killer || "Unknown cause"));
+          if (d.killerLevel) g.appendChild(el("span", "sub", " level " + d.killerLevel));
+          if (d.zone) g.appendChild(el("span", "sub", " · " + d.zone));
+          li.appendChild(g);
+          li.appendChild(el("span", "when", d.time ? agoUnix(d.time) : ""));
+          dul.appendChild(li);
+        });
+      };
+      fillD(10);
+      dcard.appendChild(dul);
+      if (!dl.length) dcard.appendChild(el("p", "empty", "Death details appear once AutoBiographer has logged them."));
+      moreButton(dcard, dl.length, 10, "deaths", fillD);
+      deaths.appendChild(dcard);
+    } else deaths.appendChild(el("p", "empty", "Not a single death so far."));
+    mainEl.appendChild(deaths);
+
+    // ---- zones
+    var zones = block("zones", "Zones", c.zones.length ? c.zones.length + " visited" : "");
+    var zs = c.zones.filter(function (z) { return !z.instance; }).slice(0, 12);
+    if (zs.length) {
+      var zcard = el("div", "card");
+      zcard.appendChild(barList(zs.map(function (z) { return { name: z.name, value: z.seconds, note: z.firstLevel ? "from level " + z.firstLevel : "" }; }), dur));
+      zones.appendChild(zcard);
+    } else zones.appendChild(el("p", "empty", "No zone time tracked yet."));
+    mainEl.appendChild(zones);
+
+    // ---- dungeons
+    var dun = block("dungeons", "Dungeons & raids", c.dungeons.length ? c.dungeons.length + " so far" : "");
+    if (c.dungeons.length) {
+      var grid = el("div", "grid");
+      c.dungeons.forEach(function (d) {
+        var k = el("article", "card");
+        var h3 = el("h3", null, d.name); if (d.raid) h3.appendChild(el("span", "tag-s", "raid"));
+        k.appendChild(h3);
+        var bits = [];
+        if (d.firstLevel) bits.push("first at level " + d.firstLevel);
+        if (d.firstTime) bits.push(day(d.firstTime));
+        if (d.seconds) bits.push(dur(d.seconds) + " inside");
+        k.appendChild(el("p", "muted mono", bits.join(" · ")));
+        var bosses = arr(d.bosses);
+        if (bosses.length) {
+          var ch = el("div", "chips");
+          bosses.forEach(function (b) { ch.appendChild(el("span", "chip", b)); });
+          k.appendChild(ch);
+        }
+        grid.appendChild(k);
+      });
+      dun.appendChild(grid);
+    } else dun.appendChild(el("p", "empty", "No dungeons yet."));
+    mainEl.appendChild(dun);
+
+    // ---- quests & kills
+    var qk = block("quests", "Quests & kills");
+    var qst = el("div", "stats");
+    qst.appendChild(stat("Quests done", num(c.quests.total)));
+    qst.appendChild(stat("XP from quests", compact(c.quests.xp)));
+    qst.appendChild(stat("Gold from quests", goldNode(c.quests.gold)));
+    qst.appendChild(stat("Kills", num(c.kills.total)));
+    qst.appendChild(stat("Different creatures", num(c.kills.unique)));
+    if (c.kills.pvp) qst.appendChild(stat("Players killed", num(c.kills.pvp)));
+    qk.appendChild(qst);
+    var qcards = el("div", "cards two");
+    if (c.quests.biggest.length) {
+      var qb = el("div", "card"); qb.appendChild(el("h3", null, "Biggest XP turn-ins"));
+      var ul = el("ul", "rows");
+      c.quests.biggest.forEach(function (q) {
+        var li = el("li"); li.appendChild(el("span", "lvl", String(q.level || "?")));
+        li.appendChild(el("span", "grow", q.title || "Quest"));
+        li.appendChild(el("span", "when", compact(q.xp) + " XP"));
+        ul.appendChild(li);
+      });
+      qb.appendChild(ul); qcards.appendChild(qb);
+    }
+    if (c.kills.top.length) {
+      var kb = el("div", "card"); kb.appendChild(el("h3", null, "Most killed"));
+      kb.appendChild(barList(c.kills.top.map(function (k) { return { name: k.name, value: k.count }; }), num));
+      qcards.appendChild(kb);
+    }
+    if (c.quests.recent.length) {
+      var qr = el("div", "card"); qr.appendChild(el("h3", null, "Latest turn-ins"));
+      var ul2 = el("ul", "rows");
+      c.quests.recent.forEach(function (q) {
+        var li = el("li"); li.appendChild(el("span", "lvl", String(q.level || "?")));
+        li.appendChild(el("span", "grow", q.title || "Quest"));
+        li.appendChild(el("span", "when", q.time ? agoUnix(q.time) : ""));
+        ul2.appendChild(li);
+      });
+      qr.appendChild(ul2); qcards.appendChild(qr);
+    }
+    if (qcards.children.length) qk.appendChild(qcards);
+    mainEl.appendChild(qk);
+
+    // ---- gold
+    var gold = block("gold", "Gold", "lifetime, on this character");
+    var m2 = c.money2;
+    var gst = el("div", "stats");
+    gst.appendChild(stat("Earned", goldNode(m2.gained)));
+    gst.appendChild(stat("Looted from mobs", goldNode(m2.loot)));
+    gst.appendChild(stat("Spent", goldNode(m2.lost)));
+    if (c.money != null) gst.appendChild(stat("In my bags now", goldNode(c.money)));
+    gold.appendChild(gst);
+    var srcs = [["Looted", m2.loot], ["Quest rewards", m2.quest], ["Sold to vendors", m2.merchant], ["Auction house", m2.auction], ["Mail", m2.mail], ["Trades", m2.trade], ["Other", m2.other]]
+      .filter(function (x) { return x[1] > 0; }).map(function (x) { return { name: x[0], value: x[1] }; }).sort(function (a, b) { return b.value - a.value; });
+    if (srcs.length) {
+      var gcard = el("div", "card"); gcard.appendChild(el("h3", null, "Where the gold came from"));
+      gcard.appendChild(barList(srcs, goldNode));
+      gold.appendChild(gcard);
+    }
+    mainEl.appendChild(gold);
+
+    // ---- time & travel
+    var tr = block("travel", "Time & travel");
+    var tst = el("div", "stats");
+    var dist = c.distance;
+    tst.appendChild(stat("On foot", km(dist.foot)));
+    if (dist.mounted) tst.appendChild(stat("Mounted", km(dist.mounted)));
+    if (dist.swim) tst.appendChild(stat("Swimming", km(dist.swim)));
+    if (dist.flight) tst.appendChild(stat("Flight paths", km(dist.flight)));
+    if (dist.ghost) tst.appendChild(stat("As a ghost", km(dist.ghost)));
+    if (c.misc.jumps) tst.appendChild(stat("Jumps", num(c.misc.jumps)));
+    if (c.time.combat) tst.appendChild(stat("In combat", dur(c.time.combat)));
+    if (c.time.afk) tst.appendChild(stat("AFK", dur(c.time.afk)));
+    if (c.time.taxi) tst.appendChild(stat("On flights", dur(c.time.taxi)));
+    if (c.time.party) tst.appendChild(stat("In a group", dur(c.time.party)));
+    if (c.misc.fishCaught) tst.appendChild(stat("Fish caught", num(c.misc.fishCaught)));
+    if (c.misc.subzones) tst.appendChild(stat("Places discovered", num(c.misc.subzones)));
+    tr.appendChild(tst);
+    if (c.grouped.top.length) {
+      var gc = el("div", "card"); gc.appendChild(el("h3", null, "Most time grouped with"));
+      gc.appendChild(barList(c.grouped.top.map(function (g) { return { name: g.name, value: g.seconds }; }), dur));
+      tr.appendChild(gc);
+    }
+    mainEl.appendChild(tr);
+
+    // ---- beyond 60: professions, gear, milestones
+    var by = block("beyond", "Beyond 60", done ? "the character, now that the leveling is done" : "the character so far");
+    var bst = el("div", "stats");
+    if (c.ilvl) bst.appendChild(stat("Average item level", String(c.ilvl)));
+    if (c.guild) bst.appendChild(stat("Guild", c.guild));
+    if (c.misc.spellsLearned) bst.appendChild(stat("Spells learned", num(c.misc.spellsLearned)));
+    if (c.misc.itemsFound) bst.appendChild(stat("New items found", num(c.misc.itemsFound)));
+    if (bst.children.length) by.appendChild(bst);
+    var bcards = el("div", "cards two");
+    if (c.professions.length) {
+      var pc = el("div", "card"); pc.appendChild(el("h3", null, "Professions"));
+      var pul = el("ul", "bars");
+      c.professions.forEach(function (p) {
+        var li = el("li"); li.appendChild(el("span", "nm", p.name));
+        li.appendChild(el("span", "v", p.rank + " / " + p.max));
+        var trk = el("span", "track"), fl = el("span"); fl.style.width = Math.min(100, p.max ? p.rank / p.max * 100 : 0) + "%";
+        trk.appendChild(fl); li.appendChild(trk); pul.appendChild(li);
+      });
+      pc.appendChild(pul); bcards.appendChild(pc);
+    }
+    if (c.gear.length) {
+      var gcd = el("div", "card"); gcd.appendChild(el("h3", null, "Gear"));
+      var gul = el("ul", "rows");
+      c.gear.forEach(function (it) {
+        var li = el("li"), q = el("span", "q");
+        q.style.background = QUALITY[it.quality] || QUALITY[1];
+        li.appendChild(q); li.appendChild(el("span", "grow", it.name));
+        gul.appendChild(li);
+      });
+      gcd.appendChild(gul); bcards.appendChild(gcd);
+    }
+    if (c.highlights.length) {
+      var hc = el("div", "card"); hc.appendChild(el("h3", null, "Milestones"));
+      var hul = el("ul", "rows");
+      c.highlights.slice().reverse().slice(0, 12).forEach(function (h) {
+        var li = el("li"); li.appendChild(el("span", "lvl", String(h.level || "?")));
+        li.appendChild(el("span", "grow", h.text));
+        li.appendChild(el("span", "when", h.time ? day(h.time) : ""));
+        hul.appendChild(li);
+      });
+      hc.appendChild(hul); bcards.appendChild(hc);
+    }
+    if (bcards.children.length) by.appendChild(bcards);
+    else by.appendChild(el("p", "empty", "Professions, gear and milestones show up here as they are recorded."));
+    mainEl.appendChild(by);
+
+    if (!c.hasAutoBiographer) mainEl.appendChild(el("p", "note", "AutoBiographer has no data for this character yet, so only the RoadTo60 numbers show."));
+    else if (!c.hasRoadTo60 && !done) mainEl.appendChild(el("p", "note", "Without the RoadTo60 addon on this character, the XP inside the current level is estimated from AutoBiographer."));
+
+    // stagger the cards in like the other pages
+    if (!still()) {
+      Array.prototype.forEach.call(mainEl.querySelectorAll(".grid"), function (g) {
+        Array.prototype.forEach.call(g.children, function (k, i) {
+          k.style.setProperty("--i", Math.min(i, 14)); k.classList.add("enter");
+          k.addEventListener("animationend", function fin(ev) { if (ev.target !== k) return; k.classList.remove("enter"); k.removeEventListener("animationend", fin); });
+        });
+      });
+    }
+  }
+
+  // ------------------------------------------------------------ switching characters (#<key>)
+  function show(key) {
+    var c = byKey[key] || byKey[J.current] || chars[0];
+    Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", k === c.key); });
+    render(c);
+  }
+  window.addEventListener("hashchange", function () {
+    var h = decodeURIComponent(location.hash.slice(1));
+    if (byKey[h]) { show(h); window.scrollTo(0, 0); }
+  });
+  show(decodeURIComponent(location.hash.slice(1)));
+})();
+</script>
+<script>
+// Shared by every page (addons, macros, ...): avatar + live badge, support links,
+// "/" to search, card entrance, header embers.
+(function () {
+  "use strict";
+  var D = window.ADDON_DATA || window.MACRO_DATA || window.JOURNEY_DATA || {};
+  var S = D.support || {};
+  var $ = function (id) { return document.getElementById(id); };
+  function url(u) { u = String(u || "").trim(); return /^https?:\/\//i.test(u) ? u : ""; }
+  var still = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  // ---- avatar: links to Twitch, swaps picture on hover, and now and then shows the rare one
+  var tw = url(D.twitchUrl), chan = (/twitch\.tv\/([A-Za-z0-9_]{3,25})/i.exec(tw) || [])[1];
+  var av = $("avatar");
+  if (av && tw) {
+    var main = av.querySelector(".av-main");
+    av.href = tw;
+    av.title = tw.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+    av.setAttribute("aria-label", (chan || "My channel") + " on Twitch");
+    if (Math.random() < 1 / 12) main.src = "assets/avatar-blur.png";
+    main.addEventListener("error", function () { av.hidden = true; });
+    av.hidden = false;
+  }
+
+  // ---- live badge (decapi.me answers without a Twitch key; checked every 2 minutes)
+  var live = $("live");
+  function short(t) {
+    var d = /(\d+)\s*day/.exec(t), h = /(\d+)\s*hour/.exec(t), m = /(\d+)\s*minute/.exec(t);
+    var hours = (d ? +d[1] * 24 : 0) + (h ? +h[1] : 0), mins = m ? +m[1] : 0;
+    return hours ? hours + "h " + mins + "m" : mins ? mins + "m" : "just started";
+  }
+  function grab(u) { return fetch(u, { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; }); }
+  function setLive(on, info) {
+    live.hidden = !on;
+    var top = document.querySelector(".top");
+    if (top) top.classList.toggle("is-live", on);
+    if (on) $("live-info").textContent = info;
+  }
+  function check() {
+    if (document.hidden) return;
+    var base = "https://decapi.me/twitch/";
+    grab(base + "uptime/" + chan).then(function (up) {
+      up = up.trim();
+      // Offline reads "<name> is offline"; errors carry no time, so they count as offline too
+      var on = !/offline/i.test(up) && /\d+\s*(day|hour|minute|second)/i.test(up);
+      if (!on) { setLive(false); return; }
+      return grab(base + "game/" + chan).then(function (game) {
+        game = game.trim();
+        if (game.length > 48 || /error|not found|invalid/i.test(game)) game = "";
+        setLive(true, (game ? " \u00b7 " + game : "") + " \u00b7 " + short(up));
+      });
+    }).catch(function () { });
+  }
+  if (live && chan && window.fetch) {
+    live.href = tw;
+    check();
+    setInterval(check, 120000);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) check(); });
+  }
+
+  var kofi = url(S.kofiUrl), tree = url(S.linktreeUrl), hire = String(S.commissions || "").trim();
+
+  if (kofi) {
+    $("kofi").href = kofi;
+    $("kofi-note").textContent = S.kofiNote || "Every tip helps the stream";
+    $("kofi").hidden = false;
+  }
+  if (hire) {
+    var p = $("hire"), b = document.createElement("b");
+    b.textContent = "Open for commissions. ";
+    p.appendChild(b);
+    p.appendChild(document.createTextNode(hire));
+    if (tree) {
+      var a = document.createElement("a");
+      a.href = tree; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Get in touch";
+      p.appendChild(document.createTextNode(" "));
+      p.appendChild(a);
+    }
+    p.hidden = false;
+  }
+  $("support").hidden = !(kofi || hire);
+  if (tree && $("meta")) {
+    var li = document.createElement("li"), l = document.createElement("a");
+    l.href = tree; l.textContent = tree.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "");
+    li.appendChild(l); $("meta").appendChild(li);
+  }
+
+  // ---- chat commands: one list in config.json, shown the same way on every page
+  var cmds = D.commands;
+  cmds = Array.isArray(cmds) ? cmds : (cmds && Array.isArray(cmds.value) ? cmds.value : []);
+  var cbox = $("cmds");
+  if (cbox && cmds.length) {
+    var here = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+    var mine = { "index.html": "!addons", "macros.html": "!macros", "journey.html": "!journey" }[here];
+    var h2 = document.createElement("h2");
+    h2.innerHTML = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+    h2.appendChild(document.createTextNode("Chat commands"));
+    var sm = document.createElement("small");
+    sm.textContent = chan ? "type them in twitch.tv/" + chan : "type them in my Twitch chat";
+    h2.appendChild(sm);
+    var ul = document.createElement("ul");
+    cmds.forEach(function (c) {
+      if (!c || !c.command) return;
+      var li = document.createElement("li"), code = document.createElement("code"), sp = document.createElement("span");
+      code.textContent = c.command; sp.textContent = c.text || "";
+      if (String(c.command).toLowerCase() === mine) { li.className = "here"; sp.textContent += " (this page)"; }
+      li.appendChild(code); li.appendChild(sp); ul.appendChild(li);
+    });
+    cbox.appendChild(h2); cbox.appendChild(ul);
+    cbox.hidden = false;
+  }
+
+  // "/" jumps to the search box (like opening chat in WoW), Esc clears it
+  document.addEventListener("keydown", function (e) {
+    var s = $("search"), t = e.target;
+    if (!s) return;
+    var typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+    if (e.key === "/" && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault(); s.focus(); s.select();
+    } else if (e.key === "Escape" && t === s) {
+      s.value = ""; s.dispatchEvent(new Event("input")); s.blur();
+    }
+  });
+
+  // Cards fade in one after another the first time they are shown
+  if (!still) {
+    Array.prototype.forEach.call(document.querySelectorAll(".grid"), function (grid) {
+      Array.prototype.forEach.call(grid.children, function (card, i) {
+        card.style.setProperty("--i", Math.min(i, 14));
+        card.classList.add("enter");
+        card.addEventListener("animationend", function done(ev) {
+          if (ev.target !== card) return;
+          card.classList.remove("enter"); card.style.removeProperty("--i");
+          card.removeEventListener("animationend", done);
+        });
+      });
+    });
+  }
+
+  // ---- embers drifting up behind the header (paused when not visible)
+  var cv = $("embers");
+  if (cv && cv.getContext && !still) {
+    var ctx = cv.getContext("2d"), W = 0, H = 0, parts = [], running = false, seen = true, last = 0;
+    var COLORS = ["227,167,63", "242,191,98", "232,135,58"];
+    var spawn = function (anywhere) {
+      return {
+        x: Math.random() * W, y: anywhere ? Math.random() * H : H + 8,
+        r: 0.8 + Math.random() * 1.6, v: 10 + Math.random() * 24,
+        sway: 6 + Math.random() * 18, ph: Math.random() * 6.283, f: 0.6 + Math.random() * 1.4,
+        c: COLORS[(Math.random() * COLORS.length) | 0], a: 0.35 + Math.random() * 0.5
+      };
+    };
+    var fit = function () {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = cv.clientWidth; H = cv.clientHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var want = Math.max(14, Math.min(44, Math.round(W / 32)));
+      while (parts.length < want) parts.push(spawn(true));
+      parts.length = want;
+    };
+    var frame = function (t) {
+      if (!running) return;
+      var dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        p.y -= p.v * dt; p.ph += p.f * dt;
+        if (p.y < -8) p = parts[i] = spawn(false);
+        var fade = Math.max(0, Math.min(1, p.y / (H * 0.6))) * Math.max(0, Math.min(1, (H - p.y) / 60));
+        ctx.globalAlpha = p.a * fade * (0.75 + 0.25 * Math.sin(p.ph * 3.1));
+        ctx.fillStyle = "rgb(" + p.c + ")";
+        ctx.beginPath();
+        ctx.arc(p.x + Math.sin(p.ph) * p.sway, p.y, p.r, 0, 6.283);
+        ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    };
+    var play = function () {
+      var go = seen && !document.hidden;
+      if (go && !running) { running = true; last = 0; requestAnimationFrame(frame); }
+      if (!go) running = false;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    document.addEventListener("visibilitychange", play);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { seen = en[0].isIntersecting; play(); }).observe(cv);
+    }
+    play();
+  }
+})();
+</script>
+</body>
+</html>
