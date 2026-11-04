@@ -103,6 +103,9 @@
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
   @media (prefers-reduced-motion: reduce) { main { animation: none; } }
 
+  .layout.solo { grid-template-columns: minmax(0, 1fr); }
+  footer { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; line-height: 20px; }
+  .tile .val.none { color: var(--text-3); }
   .toc { list-style: none; margin: 8px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
   .toc a { display: block; padding: 4px 10px; border-radius: 6px; color: var(--text-3); text-decoration: none; font-size: 13px; line-height: 20px; transition: color 150ms var(--ease), background-color 150ms var(--ease); }
   .toc a:hover { color: var(--text); background: var(--card); }
@@ -258,8 +261,12 @@
     .table-wrap { margin: 0 -16px; padding: 0 16px; }
     .cards, .cards.two, .grid { grid-template-columns: minmax(0, 1fr); }
   }
-  @media (max-width: 420px) {
+  @media (max-width: 340px) {
     .tiles { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .tile { padding: 12px; }
+    .tile .val { font-size: 24px; }
   }
   /* ---- shared by every page: header support block, search hint, motion ---- */
   [hidden] { display: none !important; }
@@ -401,7 +408,7 @@
 </div>
 
 <script>
-window.JOURNEY_DATA = {"journey":{"characters":[],"current":null,"main":null,"xpTable":[400,900,1400,2100,2800,3600,4500,5400,6500,7600,8800,10100,11400,12900,14400,16000,17700,19400,21300,23200,25200,27300,29400,31700,34000,36400,38900,41400,44300,47400,50800,54500,58600,62800,67100,71600,76100,80800,85700,90700,95800,101000,106300,111800,117500,123200,129100,135100,141200,147500,153900,160400,167100,173900,180800,187900,195000,202300,209800],"referenceHours":140,"typical":[[0,1],[0.112,2],[0.336,3],[0.651,4],[1.078,5],[1.597,6],[2.208,7],[2.911,8],[3.69,9],[4.561,10],[5.507,11],[6.531,12],[7.63,13],[8.794,14],[10.033,15],[11.336,16],[12.703,17],[14.134,18],[15.62,19],[17.169,20],[18.772,21],[20.43,22],[22.143,23],[23.902,24],[25.715,25],[27.575,26],[29.482,27],[31.436,28],[33.43,29],[35.48,30],[37.588,31],[39.762,32],[42.007,33],[44.332,34],[46.736,35],[49.213,36],[51.782,37],[54.454,38],[57.231,39],[60.115,40],[63.106,41],[66.203,42],[69.405,43],[72.71,44],[76.121,45],[79.641,46],[83.264,47],[86.995,48],[90.83,49],[94.77,50],[98.817,51],[102.97,52],[107.227,53],[111.592,54],[116.062,55],[120.638,56],[125.321,57],[130.108,58],[135,59],[140,60]],"halfLifeHours":24},"pageTitle":"Road to 60 \u0026 Beyond!","streamerName":"Saltydayn","twitchUrl":"https://www.twitch.tv/saltydayn","support":{"kofiUrl":"https://ko-fi.com/saltydayn","kofiNote":"95% goes straight to me","linktreeUrl":"https://saltydayn.pages.dev","commissions":"Custom IT solutions, stream assets, WoW addons and more."},"gameLabel":"WoW Forever","addonsUrl":"./","pageUrl":"https://saltydayn.github.io/addons/journey.html","commands":[{"command":"!addons","text":"Link to my addon list"},{"command":"!macros","text":"Link to my macros"},{"command":"!journey","text":"Link to my Road to 60 page"},{"command":"!eta","text":"How long until I hit 60, at my current pace"},{"command":"!level","text":"My level and time played right now"},{"command":"!r60","text":"Road to 60 for one character: !r60 rogue or !r60 \u003cname\u003e"}],"generated":"2026-11-04T10:59:31.8617398Z"};
+window.JOURNEY_DATA = {"journey":{"characters":[],"current":null,"main":null,"xpTable":[400,900,1400,2100,2800,3600,4500,5400,6500,7600,8800,10100,11400,12900,14400,16000,17700,19400,21300,23200,25200,27300,29400,31700,34000,36400,38900,41400,44300,47400,50800,54500,58600,62800,67100,71600,76100,80800,85700,90700,95800,101000,106300,111800,117500,123200,129100,135100,141200,147500,153900,160400,167100,173900,180800,187900,195000,202300,209800],"referenceHours":140,"typical":[[0,1],[0.112,2],[0.336,3],[0.651,4],[1.078,5],[1.597,6],[2.208,7],[2.911,8],[3.69,9],[4.561,10],[5.507,11],[6.531,12],[7.63,13],[8.794,14],[10.033,15],[11.336,16],[12.703,17],[14.134,18],[15.62,19],[17.169,20],[18.772,21],[20.43,22],[22.143,23],[23.902,24],[25.715,25],[27.575,26],[29.482,27],[31.436,28],[33.43,29],[35.48,30],[37.588,31],[39.762,32],[42.007,33],[44.332,34],[46.736,35],[49.213,36],[51.782,37],[54.454,38],[57.231,39],[60.115,40],[63.106,41],[66.203,42],[69.405,43],[72.71,44],[76.121,45],[79.641,46],[83.264,47],[86.995,48],[90.83,49],[94.77,50],[98.817,51],[102.97,52],[107.227,53],[111.592,54],[116.062,55],[120.638,56],[125.321,57],[130.108,58],[135,59],[140,60]],"halfLifeHours":24},"pageTitle":"Road to 60 \u0026 Beyond!","streamerName":"Saltydayn","twitchUrl":"https://www.twitch.tv/saltydayn","support":{"kofiUrl":"https://ko-fi.com/saltydayn","kofiNote":"95% goes straight to me","linktreeUrl":"https://saltydayn.pages.dev","commissions":"Custom IT solutions, stream assets, WoW addons and more."},"gameLabel":"WoW Forever","addonsUrl":"./","pageUrl":"https://saltydayn.github.io/addons/journey.html","commands":[{"command":"!addons","text":"Link to my addon list"},{"command":"!macros","text":"Link to my macros"},{"command":"!journey","text":"Link to my Road to 60 page"},{"command":"!eta","text":"How long until I hit 60, at my current pace"},{"command":"!level","text":"My level and time played right now"},{"command":"!r60","text":"Road to 60 for one character: !r60 rogue or !r60 \u003cname\u003e"}],"generated":"2026-11-04T14:52:32.2986228Z"};
 </script>
 <script>
 (function () {
@@ -413,6 +420,7 @@ window.JOURNEY_DATA = {"journey":{"characters":[],"current":null,"main":null,"xp
   var mainEl = $("main");
 
   if (!D || !D.journey) {
+    mainEl.parentNode.classList.add("solo");
     mainEl.innerHTML = '<p class="empty">No journey data yet. Run Update-JourneyList.ps1 to build this page.</p>';
     return;
   }
@@ -536,12 +544,22 @@ window.JOURNEY_DATA = {"journey":{"characters":[],"current":null,"main":null,"xp
   if (updated && ago(updated)) metaItem("updated " + ago(updated));
 
   if (!chars.length) {
-    var box = el("div", "hero");
+    mainEl.parentNode.classList.add("solo");
+    var box = el("section", "hero");
     var left = el("div");
-    left.appendChild(el("p", "label", "Time to 60"));
+    left.appendChild(el("p", "label", "Time to 60, in /played"));
     left.appendChild(el("p", "big", "Soon"));
-    left.appendChild(el("p", "range", "The journey starts at launch. This page fills in after the first logout or /reload with AutoBiographer and the RoadTo60 addon running."));
+    left.appendChild(el("p", "range", "The journey starts with WoW Forever. After the first play session this page shows the time to 60, pace, deaths, zones, dungeons, gold and more."));
     box.appendChild(left);
+    var tl = el("div", "tiles");
+    [["Level", "starts at 1"], ["Time played", "counting from launch"], ["XP per hour", "after the first levels"], ["Deaths", "none yet"]].forEach(function (t) {
+      var d = el("div", "tile");
+      d.appendChild(el("p", "label", t[0]));
+      d.appendChild(el("div", "val none", "\u2014"));
+      d.appendChild(el("p", "foot", t[1]));
+      tl.appendChild(d);
+    });
+    box.appendChild(tl);
     mainEl.appendChild(box);
     return;
   }
