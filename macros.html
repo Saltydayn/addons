@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sunk: #12110f;
+    --bg: #161513;
+    --card: #1c1a18;
+    --raised: #262421;
+    --line: rgba(239, 233, 222, 0.08);
+    --line-2: rgba(239, 233, 222, 0.16);
+    --text: #efe9de;
+    --text-2: #aaa398;
+    --text-3: #8a847a;
+    --accent: #e3a73f;
+    --good: #4cc38a;
+    --bad: #e5484d;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 15px/22px var(--sans); }
+  a { color: inherit; }
+  [hidden] { display: none !important; }
+  svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  .shell { max-width: 1200px; margin: 0 auto; padding: 0 32px 64px; }
+
+  /* page switch (shared with the addon page) */
+  .pages { display: flex; gap: 24px; padding-top: 32px; font: 400 13px/20px var(--mono); }
+  .pages a { color: var(--text-3); text-decoration: none; padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color 150ms var(--ease); }
+  .pages a:hover { color: var(--text); }
+  .pages a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* header */
+  .top { padding: 48px 0 48px; }
+  h1 {
+    font: 400 56px/1.05 var(--serif); letter-spacing: -0.02em;
+    margin: 0 0 16px; font-variation-settings: "opsz" 144;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 0; margin: 0; padding: 0; list-style: none; color: var(--text-3); font: 400 13px/20px var(--mono); }
+  .meta li + li::before { content: "\00b7"; margin: 0 10px; }
+  .meta b { font-weight: 400; color: var(--text-2); }
+  .meta a { color: var(--text-2); text-decoration: none; transition: color 150ms var(--ease); }
+  .meta a:hover { color: var(--text); }
+
+  /* layout */
+  .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 48px; align-items: start; }
+  .side { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 16px; }
+  .search {
+    width: 100%; height: 36px; padding: 0 12px;
+    background: var(--sunk); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    font: 400 14px var(--sans);
+    transition: border-color 150ms var(--ease);
+  }
+  .search::placeholder { color: var(--text-3); }
+  .search:focus { outline: none; border-color: var(--accent); }
+  .search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .tabs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tabs a {
+    display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px;
+    border-radius: 8px; color: var(--text-2); text-decoration: none; font-size: 14px;
+    transition: background-color 150ms var(--ease), color 150ms var(--ease);
+  }
+  .tabs a:hover { color: var(--text); background: var(--card); }
+  .tabs a.on { color: var(--text); background: var(--raised); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06); }
+  .tabs a .i { color: var(--text-3); }
+  .tabs a.on .i { color: var(--accent); }
+  .tabs .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabs .n { margin-left: auto; color: var(--text-3); font: 400 12px var(--mono); font-variant-numeric: tabular-nums; }
+  .tabs .sep { height: 1px; background: var(--line); margin: 8px 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin: 0 4px; background: var(--text-3); }
+
+  main { min-width: 0; animation: rise 400ms var(--ease) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { main { animation: none; } }
+
+  /* this week */
+  .changes {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 24px 12px; margin-bottom: 48px;
+  }
+  .changes h2 { display: flex; align-items: center; gap: 10px; font: 500 15px/20px var(--sans); margin: 0 0 8px; }
+  .changes h2 .i { color: var(--accent); }
+  .changes ol { list-style: none; margin: 0; padding: 0; }
+  .changes li {
+    display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+    min-height: 40px; border-top: 1px solid var(--line);
+  }
+  .changes li:first-child { border-top: 0; }
+  .tag { font: 400 12px var(--mono); }
+  .tag.added { color: var(--good); }
+  .tag.removed { color: var(--bad); }
+  .tag.edited { color: var(--accent); }
+  .changes .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .changes a.what { text-decoration: none; font-weight: 500; }
+  .changes a.what:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+  .changes span.what { color: var(--text-3); }
+  .changes .where { color: var(--text-3); font-weight: 400; }
+  .changes .when { color: var(--text-3); font: 400 12px var(--mono); white-space: nowrap; }
+
+  /* groups */
+  section.group { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .group-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 16px; }
+  .group-head h2 { font: 400 28px/1.2 var(--serif); margin: 0; font-variation-settings: "opsz" 48; }
+  .group-head .sub { color: var(--text-3); font: 400 13px var(--mono); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; align-items: start; }
+  .macro {
+    display: flex; flex-direction: column; gap: 12px; min-width: 0;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 12px 12px 16px; scroll-margin-top: 24px;
+    transition: border-color 600ms var(--ease);
+  }
+  .macro.flash { border-color: var(--accent); transition-duration: 150ms; }
+  .macro-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .icon {
+    width: 32px; height: 32px; flex: none; border-radius: 6px; overflow: hidden;
+    background: var(--raised); border: 1px solid var(--line-2);
+    display: grid; place-items: center; color: var(--text-3); font: 400 13px var(--mono);
+  }
+  .icon img { width: 100%; height: 100%; display: block; }
+  .name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .name.untitled { color: var(--text-3); font-weight: 400; }
+  .new { color: var(--good); font: 400 12px var(--mono); flex: none; }
+  .copy {
+    margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 10px; border-radius: 6px;
+    background: transparent; color: var(--text-2); border: 1px solid var(--line-2);
+    font: 400 12px var(--mono); cursor: pointer;
+    transition: color 150ms var(--ease), border-color 150ms var(--ease), background-color 150ms var(--ease);
+  }
+  .copy .i { width: 14px; height: 14px; }
+  .copy:hover { color: var(--text); background: var(--raised); }
+  .copy:active { transform: translateY(1px); }
+  .copy.done { color: var(--good); border-color: rgba(76, 195, 138, 0.4); }
+  pre.body {
+    margin: 0; padding: 12px 14px; background: var(--sunk); border: 1px solid var(--line); border-radius: 8px;
+    color: var(--text); font: 400 13px/20px var(--mono); white-space: pre-wrap; overflow-wrap: anywhere;
+    tab-size: 4;
+  }
+  pre.body .cmd { color: var(--accent); }
+  pre.body .meta-line { color: var(--text-2); }
+  pre.body.empty { color: var(--text-3); }
+
+  .empty { color: var(--text-3); margin: 0; }
+  footer { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .shell { padding: 0 16px 48px; }
+    .pages { padding-top: 24px; }
+    .top { padding: 32px 0 32px; }
+    h1 { font-size: 40px; }
+    .meta { flex-direction: column; }
+    .meta li + li::before { content: none; }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .side { position: static; }
+    .tabs { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .tabs a { height: 32px; border: 1px solid var(--line); }
+    .tabs a .i { display: none; }
+    .tabs .n { margin-left: 0; }
+    .tabs .sep { display: none; }
+    .changes { padding: 16px 16px 8px; margin-bottom: 40px; }
+    .changes li { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 8px; }
+    section.group { margin-bottom: 40px; }
+    .group-head h2 { font-size: 24px; }
+    .grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="pages" aria-label="Pages">
+    <a id="to-addons" href="./">Addons</a>
+    <a href="macros.html" aria-current="page">Macros</a>
+  </nav>
+  <header class="top">
+    <h1 id="title">Macros</h1>
+    <ul class="meta" id="meta"></ul>
+  </header>
+  <div class="layout">
+    <aside class="side" id="side" hidden>
+      <input class="search" id="search" type="search" placeholder="Search all macros" aria-label="Search macros" autocomplete="off">
+      <nav aria-label="Characters"><ul class="tabs" id="tabs"></ul></nav>
+    </aside>
+    <main>
+      <section class="changes" id="changes" hidden></section>
+      <div id="list"></div>
+      <p class="empty" id="none" hidden>No macros match</p>
+    </main>
+  </div>
+  <footer>Read straight from my WoW macro files and updated automatically</footer>
+</div>
+
+<script>
+window.MACRO_DATA = {"pageTitle":"Saltydayn\u0027s Forever Macros","streamerName":"Saltydayn","twitchUrl":"https://www.twitch.tv/saltydayn","gameLabel":"WoW Forever","addonsUrl":"./","lastChanged":"2026-11-04T09:25:17.1067421Z","changes":[],"groups":[{"id":"general","kind":"general","label":"General","macros":[{"name":" ","key":"(no name)","icon":"134400","body":"#showtooltip\n/cast Poisons","iconName":"INV_Misc_QuestionMark"},{"name":"AMB","key":"AMB","icon":"134400","body":"#showtooltip Ambush\n/stopattack\n/cast pickpocket\n/stopattack\n/cast Ambush\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"BF","key":"BF","icon":"134400","body":"#showtooltip\n/cast Blade Flurry\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"BS","key":"BS","icon":"134400","body":"#showtooltip\n/cast Backstab\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"CS","key":"CS","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Cheap Shot\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"dance","key":"dance","icon":"134400","body":"/dance","iconName":"INV_Misc_QuestionMark"},{"name":"DECURSE","key":"DECURSE","icon":"136187","body":"/y DECURSE BITTE TRAY, DU HAST EINE AUFGABE UND DIE IST GANZ SICHER KEIN DPS","iconName":"Spell_Shadow_RaiseDead"},{"name":"dist","key":"dist","icon":"134400","body":"#showtooltip\n/cast [@cursor] Distract","iconName":"INV_Misc_QuestionMark"},{"name":"EA","key":"EA","icon":"134400","body":"#showtooltip\n/cast Expose Armor\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"EVA","key":"EVA","icon":"134400","body":"#showtooltip\n/cast Evasion\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"EVI","key":"EVI","icon":"134400","body":"#showtooltip\n/cast Eviscerate\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"G LFG","key":"G LFG","icon":"132118","body":"/gk","iconName":"Ability_Druid_Cower"},{"name":"GARR","key":"GARR","icon":"134400","body":"#showtooltip Garrote\n/stopattack\n/cast Pick Pocket\n/stopattack\n/cast Garrote\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"GOUGE","key":"GOUGE","icon":"134400","body":"#showtooltip Gouge\n/stopattack\n/cast Gouge\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"GR","key":"GR","icon":"132096","body":"/2 Semi-Progress Raid Gilde \u003c https://naga-rave-cave.pages.dev/ \u003e REKRUTIERT! Alle Infos, was wir bieten, erwarten, etc. inkl. Bewerbungsformular findet ihr auf der Website! (oder /w me) Wir haben sogar unsere eigenen Gilden Addons/Tools, etc. !","iconName":"Ability_Creature_Cursed_04"},{"name":"HI","key":"HI","icon":"134400","body":"/welcome","iconName":"INV_Misc_QuestionMark"},{"name":"KICK","key":"KICK","icon":"134400","body":"#showtooltip\n/cast Kick\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"KS","key":"KS","icon":"134400","body":"#showtooltip\n/cast Kidney Shot\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"log","key":"log","icon":"136148","body":"/combatlog","iconName":"Spell_Shadow_DemonBreath"},{"name":"MH","key":"MH","icon":"134400","body":"#showtooltip 16\n/use Instant Poison II\n/use 16","iconName":"INV_Misc_QuestionMark"},{"name":"MH2","key":"MH2","icon":"134400","body":"#showtooltip 16\n/use Solid Sharpening Stone\n/use 16","iconName":"INV_Misc_QuestionMark"},{"name":"MUT","key":"MUT","icon":"134400","body":"#showtooltip\n/cast Mutilate\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"OH","key":"OH","icon":"134400","body":"#showtooltip 17\n/use Instant Poison II\n/use 17","iconName":"INV_Misc_QuestionMark"},{"name":"OH2","key":"OH2","icon":"134400","body":"#showtooltip 17\n/use Solid Weightstone\n/use 17","iconName":"INV_Misc_QuestionMark"},{"name":"p","key":"p","icon":"134400","body":"/point","iconName":"INV_Misc_QuestionMark"},{"name":"RARES","key":"RARES","icon":"134400","body":"/target Azshir\n/target Fallen\n/target Ironspine\n/tm 8","iconName":"INV_Misc_QuestionMark"},{"name":"RELOAD","key":"RELOAD","icon":"237290","body":"/console gxrestart","iconName":"INV_Misc_EngGizmos_27"},{"name":"RS_MACRO","key":"RS_MACRO","icon":"667492","body":"","iconName":"Icon_UpgradeStone_Rare"},{"name":"RUP","key":"RUP","icon":"134400","body":"#showtooltip\n/cast Rupture\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"SBS","key":"SBS","icon":"134400","body":"#showtooltip Backstab\n/stopattack\n/cast Pick Pocket\n/stopattack\n/cast Backstab\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"SMUT","key":"SMUT","icon":"134400","body":"#showtooltip\n/cast Mutilate\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"SnD","key":"SnD","icon":"134400","body":"#showtooltip\n/cast Slice and Dice\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"SS","key":"SS","icon":"134400","body":"#showtooltip\n/cast Sinister Strike\n/cast Riposte\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"SSS","key":"SSS","icon":"134400","body":"#showtooltip Sinister Strike\n/stopattack\n/cast Pick Pocket\n/stopattack\n/cast Sinister Strike\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"STEA","key":"STEA","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Stealth\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"tar","key":"tar","icon":"134400","body":"/target Silithid Har\n/target The Harv\n/target Harvest\n/tm 8","iconName":"INV_Misc_QuestionMark"},{"name":"THROW","key":"THROW","icon":"134400","body":"#showtooltip\n/cast Throw\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"thx","key":"thx","icon":"3192688","body":"/thanks","iconName":"Ability_Racial_ReArm"},{"name":"VAN","key":"VAN","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Vanish\n/stopattack","iconName":"INV_Misc_QuestionMark"}]},{"id":"c-70-dayn-dayn","kind":"character","label":"Dayn","realm":"","cls":"Rogue","lastPlayed":true,"macros":[{"name":"AMB","key":"AMB","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Ambush\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"BS","key":"BS","icon":"134400","body":"#showtooltip\n/cast Backstab\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"Evis","key":"Evis","icon":"134400","body":"#showtooltip\n/cast Eviscerate\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"GARR","key":"GARR","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Garrote\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"gouge","key":"gouge","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Gouge\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"SBS","key":"SBS","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Backstab\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"SnD","key":"SnD","icon":"134400","body":"#showtooltip\n/cast Slice and Dice\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"SS","key":"SS","icon":"134400","body":"#showtooltip\n/cast Sinister Strike\n/startattack","iconName":"INV_Misc_QuestionMark"},{"name":"SSS","key":"SSS","icon":"134400","body":"#showtooltip\n/stopattack\n/cast Sinister Strike\n/stopattack","iconName":"INV_Misc_QuestionMark"},{"name":"throw","key":"throw","icon":"134400","body":"#showtooltip\n/cast Throw\n/startattack","iconName":"INV_Misc_QuestionMark"}]}],"generated":"2026-11-04T09:25:35.1093894Z"};
+</script>
+<script>
+(function () {
+  "use strict";
+  var D = window.MACRO_DATA;
+  var $ = function (id) { return document.getElementById(id); };
+  // Accept arrays that Windows PowerShell 5.1 wrapped as {"value":[...]}
+  function arr(x) { return Array.isArray(x) ? x : (x && Array.isArray(x.value) ? x.value : []); }
+
+  if (!D) {
+    $("list").innerHTML = '<p class="empty">No macro data yet. Run Update-MacroList.ps1 to build this page.</p>';
+    return;
+  }
+  D.groups = arr(D.groups); D.changes = arr(D.changes);
+  D.groups.forEach(function (g) { g.macros = arr(g.macros); g.macros.forEach(function (m) { m.key = m.key || m.name; }); });
+  // Local preview (output\macros.html) has no web server, so link the file itself
+  $("to-addons").href = location.protocol === "file:" ? "index.html" : (D.addonsUrl || "./");
+
+  // ------------------------------------------------------------ helpers
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  var ICONS = {
+    "globe": '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    "user": '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    "history": '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    "copy": '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+    "check": '<path d="M20 6 9 17l-5-5"/>'
+  };
+  function icon(name) {
+    var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("aria-hidden", "true");
+    s.setAttribute("class", "i");
+    s.innerHTML = ICONS[name];
+    return s;
+  }
+  // Blizzard class colors, used only for the small dot next to a character
+  var CLASS = {
+    warrior: "#c69b6d", paladin: "#f48cba", hunter: "#aad372", rogue: "#fff468", priest: "#ffffff",
+    shaman: "#0070dd", mage: "#3fc7eb", warlock: "#8788ee", druid: "#ff7c0a",
+    "death knight": "#c41e3a", deathknight: "#c41e3a", monk: "#00ff98", "demon hunter": "#a330c9", evoker: "#33937f"
+  };
+
+  // ------------------------------------------------------------ time
+  var NOW = Date.now(), WEEK = 7 * 864e5;
+  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat("en", { numeric: "auto" }) : null;
+  function ago(iso) {
+    var t = Date.parse(iso);
+    if (isNaN(t)) return "";
+    var s = Math.round((t - NOW) / 1000), a = Math.abs(s);
+    if (a < 60) return "just now";
+    var steps = [[3600, 60, "minute"], [86400, 3600, "hour"], [604800, 86400, "day"], [2629800, 604800, "week"], [31557600, 2629800, "month"], [Infinity, 31557600, "year"]];
+    for (var i = 0; i < steps.length; i++) {
+      if (a < steps[i][0]) {
+        var v = Math.round(s / steps[i][1]);
+        if (rtf) return rtf.format(v, steps[i][2]);
+        v = Math.abs(v); return v + " " + steps[i][2] + (v === 1 ? "" : "s") + " ago";
+      }
+    }
+    return "";
+  }
+
+  // ------------------------------------------------------------ groups
+  var groups = D.groups.filter(function (g) { return g.macros.length; });
+  var byId = {};
+  groups.forEach(function (g) {
+    g.id = g.id || slug(g.label);
+    g.macros.sort(function (x, y) { return String(x.name).localeCompare(String(y.name)); });
+    byId[g.id] = g;
+  });
+  function cardId(gid, name) { return "m-" + gid + "--" + (slug(name) || "x"); }
+  function blank(name) { return !String(name || "").trim(); }
+  function shownName(name) { return blank(name) ? "(no name)" : String(name); }
+
+  // ------------------------------------------------------------ changes this week
+  var latest = {};
+  D.changes.forEach(function (e) {
+    var t = Date.parse(e.at);
+    if (isNaN(t) || NOW - t >= WEEK) return;
+    e.key = e.key || e.name;
+    latest[e.group + "\u0001" + e.key] = e;   // later entries win
+  });
+  var shownChanges = [], fresh = {};
+  Object.keys(latest).forEach(function (k) {
+    var e = latest[k], g = byId[e.group];
+    var exists = !!(g && g.macros.some(function (m) { return m.key === e.key; }));
+    if (e.type === "removed" ? exists : !exists) return;   // stale entry, the page shows the truth
+    if (e.type === "added") fresh[k] = true;
+    shownChanges.push(e);
+  });
+  shownChanges.sort(function (x, y) { return Date.parse(y.at) - Date.parse(x.at); });
+
+  // ------------------------------------------------------------ header
+  var who = D.pageTitle || (D.streamerName ? D.streamerName + "’s macros" : "Macros");
+  $("title").textContent = who;
+  document.title = who;
+
+  var total = groups.reduce(function (n, g) { return n + g.macros.length; }, 0);
+  var chars = groups.filter(function (g) { return g.kind === "character"; }).length;
+  var meta = $("meta");
+  function metaItem(node) { var li = el("li"); li.appendChild(node); meta.appendChild(li); }
+  function counted(n, one, many) {
+    var f = document.createDocumentFragment();
+    f.appendChild(el("b", null, String(n))); f.appendChild(document.createTextNode(" " + (n === 1 ? one : many)));
+    return f;
+  }
+  metaItem(document.createTextNode(D.gameLabel || "WoW Forever"));
+  metaItem(counted(total, "macro", "macros"));
+  if (chars) metaItem(counted(chars, "character", "characters"));
+  if (D.lastChanged && ago(D.lastChanged)) metaItem(document.createTextNode("changed " + ago(D.lastChanged)));
+  if (D.twitchUrl && /^https?:\/\//i.test(D.twitchUrl)) {
+    var tw = el("a", null, D.twitchUrl.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""));
+    tw.href = D.twitchUrl;
+    metaItem(tw);
+  }
+
+  // ------------------------------------------------------------ tabs
+  var tabs = $("tabs"), links = {};
+  groups.forEach(function (g, i) {
+    if (i > 0 && g.kind === "character" && groups[i - 1].kind !== "character") tabs.appendChild(el("li", "sep"));
+    var li = el("li"), a = el("a");
+    a.href = "#" + g.id;
+    if (g.kind === "character") {
+      var c = CLASS[String(g.cls || "").toLowerCase()];
+      if (c) { var dot = el("span", "dot"); dot.style.background = c; dot.title = g.cls; a.appendChild(dot); }
+      else a.appendChild(icon("user"));
+    } else a.appendChild(icon("globe"));
+    a.appendChild(el("span", "label", g.label));
+    a.appendChild(el("span", "n", String(g.macros.length)));
+    li.appendChild(a); tabs.appendChild(li);
+    links[g.id] = a;
+  });
+
+  // ------------------------------------------------------------ macro cards
+  var QUESTION = "inv_misc_questionmark";
+  function iconBox(m) {
+    var box = el("span", "icon");
+    var name = String(m.iconName || "").trim();
+    var letter = String(m.name || "?").replace(/^[^a-z0-9]+/i, "").charAt(0).toUpperCase() || "?";
+    if (name && /^[\w\- ]+$/.test(name)) {
+      var img = new Image(); img.alt = ""; img.loading = "lazy"; img.decoding = "async";
+      img.src = "https://wow.zamimg.com/images/wow/icons/medium/" + name.toLowerCase().replace(/ /g, "_") + ".jpg";
+      img.onerror = function () { box.textContent = letter; };
+      box.title = name.toLowerCase() === QUESTION ? "Icon follows #showtooltip" : name;
+      box.appendChild(img);
+    } else box.textContent = letter;
+    return box;
+  }
+  function renderBody(text, pre) {
+    if (!text) { pre.classList.add("empty"); pre.textContent = "(empty)"; return pre; }
+    text.split("\n").forEach(function (line, i) {
+      if (i) pre.appendChild(document.createTextNode("\n"));
+      var m = /^(\s*)([#\/][^\s]*)(.*)$/.exec(line);
+      if (m) {
+        pre.appendChild(document.createTextNode(m[1]));
+        pre.appendChild(el("span", m[2].charAt(0) === "#" ? "meta-line" : "cmd", m[2]));
+        pre.appendChild(document.createTextNode(m[3]));
+      } else pre.appendChild(document.createTextNode(line));
+    });
+    return pre;
+  }
+  function copyText(text, done) {
+    function fallback() {
+      var t = el("textarea"); t.value = text; t.setAttribute("readonly", "");
+      t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t);
+      t.select(); var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(t); done(ok);
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    else fallback();
+  }
+  function copyButton(m) {
+    var b = el("button", "copy"); b.type = "button";
+    b.setAttribute("aria-label", "Copy macro " + shownName(m.name));
+    function set(state) {
+      b.textContent = "";
+      b.appendChild(icon(state === "done" ? "check" : "copy"));
+      b.appendChild(document.createTextNode(state === "done" ? "Copied" : state === "fail" ? "Select it" : "Copy"));
+      b.classList.toggle("done", state === "done");
+    }
+    set("idle");
+    var timer;
+    b.addEventListener("click", function () {
+      copyText(m.body || "", function (ok) {
+        set(ok ? "done" : "fail");
+        clearTimeout(timer); timer = setTimeout(function () { set("idle"); }, 1600);
+      });
+    });
+    return b;
+  }
+
+  var list = $("list"), sections = {}, rows = [];
+  groups.forEach(function (g) {
+    var sec = el("section", "group"); sec.id = g.id; sec.hidden = true;
+    var head = el("div", "group-head");
+    head.appendChild(el("h2", null, g.label));
+    var bits = [];
+    if (g.realm) bits.push(g.realm);
+    if (g.cls) bits.push(g.cls);
+    if (g.kind === "general") bits.push("shared by every character");
+    if (g.lastPlayed) bits.push("played last");
+    if (bits.length) head.appendChild(el("span", "sub", bits.join(" · ")));
+    sec.appendChild(head);
+    var grid = el("div", "grid");
+    g.macros.forEach(function (m) {
+      var card = el("article", "macro"); card.id = cardId(g.id, m.key);
+      var top = el("div", "macro-head");
+      top.appendChild(iconBox(m));
+      top.appendChild(el("span", "name" + (blank(m.name) ? " untitled" : ""), shownName(m.name)));
+      if (fresh[g.id + "\u0001" + m.key]) top.appendChild(el("span", "new", "New"));
+      top.appendChild(copyButton(m));
+      card.appendChild(top);
+      card.appendChild(renderBody(m.body || "", el("pre", "body")));
+      grid.appendChild(card);
+      rows.push({ card: card, sec: sec, text: (shownName(m.name) + "\n" + (m.body || "")).toLowerCase() });
+    });
+    sec.appendChild(grid);
+    list.appendChild(sec);
+    sections[g.id] = sec;
+  });
+
+  $("side").hidden = groups.length === 0;
+  if (!groups.length) { $("none").textContent = "No macros to show yet"; $("none").hidden = false; }
+
+  // ------------------------------------------------------------ tab switching (#general, #c-name-realm, #m-...)
+  var current = null;
+  function show(id) {
+    if (!byId[id]) id = groups.length ? groups[0].id : null;
+    current = id;
+    Object.keys(sections).forEach(function (k) { sections[k].hidden = k !== id; });
+    Object.keys(links).forEach(function (k) { links[k].classList.toggle("on", k === id); });
+  }
+  function fromHash(scroll) {
+    var h = decodeURIComponent(location.hash.slice(1));
+    var card = h.indexOf("m-") === 0 ? document.getElementById(h) : null;
+    if (card) {
+      show(card.closest("section").id);
+      if (scroll) {
+        card.scrollIntoView({ block: "center" });
+        card.classList.add("flash");
+        setTimeout(function () { card.classList.remove("flash"); }, 1600);
+      }
+    } else show(h);
+  }
+  window.addEventListener("hashchange", function () {
+    if ($("search").value) { $("search").value = ""; filter(""); }
+    fromHash(true);
+  });
+  fromHash(false);
+  if (location.hash.indexOf("#m-") === 0) setTimeout(function () { fromHash(true); }, 50);
+
+  // ------------------------------------------------------------ this week panel
+  if (shownChanges.length) {
+    var box = $("changes");
+    var h = el("h2"); h.appendChild(icon("history")); h.appendChild(document.createTextNode("This week"));
+    box.appendChild(h);
+    var ol = el("ol");
+    shownChanges.forEach(function (e) {
+      var li = el("li"), g = byId[e.group];
+      var label = e.type === "added" ? "Added" : e.type === "removed" ? "Removed" : "Edited";
+      li.appendChild(el("span", "tag " + e.type, label));
+      var where = groups.length > 1 ? " · " + (g ? g.label : (e.groupLabel || "")) : "";
+      if (e.type !== "removed" && g) {
+        var a = el("a", "what", shownName(e.name)); a.href = "#" + cardId(g.id, e.key);
+        if (where) a.appendChild(el("span", "where", where));
+        li.appendChild(a);
+      } else {
+        li.appendChild(el("span", "what", shownName(e.name) + (e.groupLabel && groups.length > 1 ? " · " + e.groupLabel : "")));
+      }
+      li.appendChild(el("span", "when", ago(e.at)));
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+    box.hidden = false;
+  }
+
+  // ------------------------------------------------------------ search across every tab
+  function filter(q) {
+    q = q.trim().toLowerCase();
+    if (!q) {
+      rows.forEach(function (r) { r.card.hidden = false; });
+      show(current);
+      $("changes").hidden = !shownChanges.length;
+      $("none").hidden = groups.length > 0;
+      return;
+    }
+    var live = {}, shown = 0;
+    rows.forEach(function (r) {
+      var ok = r.text.indexOf(q) >= 0;
+      r.card.hidden = !ok;
+      if (ok) { shown++; live[r.sec.id] = true; }
+    });
+    Object.keys(sections).forEach(function (k) { sections[k].hidden = !live[k]; });
+    Object.keys(links).forEach(function (k) { links[k].classList.remove("on"); });
+    $("changes").hidden = true;
+    $("none").hidden = shown > 0;
+  }
+  $("search").addEventListener("input", function (e) { filter(e.target.value); });
+})();
+</script>
+</body>
+</html>
